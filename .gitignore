@@ -130,3 +130,9 @@ dmypy.json
 
 #pdf's
 .pdf
+
+# Remove IntelliJ idea
+.idea/
+
+# MAC
+.DS_Store
