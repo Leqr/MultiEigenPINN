@@ -207,14 +207,14 @@ pinn = Pinn()
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 8192
+n_coll = 2048
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
 training_set_b = DataLoader(torch.utils.data.TensorDataset(input_b_, output_b_), batch_size=2, shuffle=False)
 training_set_c = DataLoader(torch.utils.data.TensorDataset(input_c_, output_c_), batch_size=n_coll, shuffle=False)
 
-"""
+
 fit_with_lam(pinn,training_set_b, training_set_c, eigen = 1.0)
 #show numerical solution
 pred = pinn.approximate_solution(input_c_)
@@ -222,8 +222,8 @@ pred = pred.detach().numpy()
 plt.scatter(input_c_,pred,marker = ".")
 plt.ylim(min(pred),max(pred))
 plt.show()
-"""
 
-true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
-#%%
 
+#true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
+
+# %%
