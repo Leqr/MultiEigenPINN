@@ -8,6 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 import torch.linalg as tl
 import numpy.linalg as nl
+import math
 
 class Sin(nn.Module):
     #sin activation function
@@ -17,11 +18,39 @@ class Sin(nn.Module):
     def forward(self, x):
         return torch.sin(x)
 
+class Encoder(nn.Module):
+    def __init__(self,d = 4) -> None:
+        super().__init__()
+        self.d = d
+
+    def fourier(self,x_i: float):
+        pi = torch.tensor(math.pi)
+        out = torch.zeros(2*self.d)
+        for i in range(self.d):
+            out[2*i] = torch.cos(pi*x_i*2**i)
+            out[2*i+1] = torch.sin(pi*x_i*2**i)
+        return out
+
+    def forward(self,x):
+        #encodes an x tensor of dimension [N,1] into a tensor of dimension [N,2*d] and therefore contains d sin and d cos
+
+        encoded = torch.zeros(x.shape[0],2*self.d)
+        for i,x_i in enumerate(x) :
+            encoded[i,:] = self.fourier(x_i)
+            
+        #encoded = x.apply_(self.fourier)
+        return encoded
+
+
 class NeuralNet(nn.Module):
     def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons):
         super(NeuralNet, self).__init__()
+
+        #fourier encoder 
+        self.encoder = Encoder(d = 4)
+
         # Number of input dimensions n
-        self.input_dimension = input_dimension
+        self.input_dimension = 2*self.encoder.d
         # Number of output dimensions m
         self.output_dimension = output_dimension
         # Number of neurons per layer
@@ -35,10 +64,12 @@ class NeuralNet(nn.Module):
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
         self.output_layer = nn.Linear(self.neurons, self.output_dimension)
 
+
     def forward(self, x):
         # The forward function performs the set of affine and non-linear transformations defining the network
         # (see equation above)
-        x = self.activation(self.input_layer(x))
+        encoded = self.encoder(x)
+        x = self.activation(self.input_layer(encoded))
         for k, l in enumerate(self.hidden_layers):
             x = self.activation(l(x))
         return self.output_layer(x)
@@ -207,7 +238,7 @@ pinn = Pinn()
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 2048
+n_coll = 100
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
