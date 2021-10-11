@@ -136,3 +136,6 @@ dmypy.json
 
 # MAC
 .DS_Store
+
+#lsf
+lsf*
