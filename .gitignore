@@ -137,3 +137,8 @@ dmypy.json
 # MAC
 .DS_Store
 
+<<<<<<< HEAD
+=======
+#lsf
+lsf*
+>>>>>>> 2a84a4c554a2ca42e32c5d1697cba8553636c55f
