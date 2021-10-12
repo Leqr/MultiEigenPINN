@@ -2,7 +2,6 @@
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.core.fromnumeric import shape
 import torch.nn as nn
 import torch.optim as optim
 import torch
@@ -24,34 +23,35 @@ class Encoder(nn.Module):
         super().__init__()
         self.d = d
 
-    def fourier(self,x_i: float):
-        pi = torch.tensor(math.pi)
-        out = torch.zeros(2*self.d)
-        for i in range(self.d):
-            out[2*i] = torch.cos(pi*x_i*2**i)
-            out[2*i+1] = torch.sin(pi*x_i*2**i)
-        return out
-
     def forward(self,x):
-        #encodes an x tensor of dimension [N,1] into a tensor of dimension [N,2*d] and therefore contains d sin and d cos
+        #encodes an x tensor of dimension [N,1] into a tensor of dimension [N,2*d] and therefore contains d sin and d cos   
+        
+        n = x.shape[0]
+        encoded = torch.zeros(n,2*self.d)
+        pi = torch.tensor(math.pi)
 
-        encoded = torch.zeros(x.shape[0],2*self.d)
-        for i,x_i in enumerate(x) :
-            encoded[i,:] = self.fourier(x_i)
-            
+        for i in range(n):
+            for j in range(self.d):
+                encoded[i,2*j] = torch.cos(pi*x[i]*2**j)
+                encoded[i,2*j+1] = torch.sin(pi*x[i]*2**j)
+        
         #encoded = x.apply_(self.fourier)
         return encoded
 
 
 class NeuralNet(nn.Module):
-    def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons):
+    def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = True):
         super(NeuralNet, self).__init__()
 
         #fourier encoder 
-        self.encoder = Encoder(d = 4)
+        self.encode = encode
+        self.encoder = Encoder(d = 6)
 
         # Number of input dimensions n
-        self.input_dimension = 2*self.encoder.d
+        if self.encode : 
+            self.input_dimension = 2*self.encoder.d
+        else:
+            self.input_dimension = 1
         # Number of output dimensions m
         self.output_dimension = output_dimension
         # Number of neurons per layer
@@ -69,8 +69,11 @@ class NeuralNet(nn.Module):
     def forward(self, x):
         # The forward function performs the set of affine and non-linear transformations defining the network
         # (see equation above)
-        encoded = self.encoder(x)
-        x = self.activation(self.input_layer(encoded))
+
+        if self.encode:
+            x = self.encoder(x)
+
+        x = self.activation(self.input_layer(x))
         for k, l in enumerate(self.hidden_layers):
             x = self.activation(l(x))
         return self.output_layer(x)
@@ -239,7 +242,7 @@ pinn = Pinn()
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 100
+n_coll = 300
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
