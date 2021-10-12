@@ -8,7 +8,6 @@ import torch
 from torch.utils.data import DataLoader
 import torch.linalg as tl
 import numpy.linalg as nl
-import math
 
 class Sin(nn.Module):
     #sin activation function
@@ -17,6 +16,14 @@ class Sin(nn.Module):
 
     def forward(self, x):
         return torch.sin(x)
+
+class Snake(nn.Module):
+    #snake activation function
+    def __init__(self, ):
+        super().__init__()
+
+    def forward(self, x):
+        return x + torch.sin(x)**2
 
 class Encoder(nn.Module):
     def __init__(self,d = 4) -> None:
@@ -28,19 +35,19 @@ class Encoder(nn.Module):
         
         n = x.shape[0]
         encoded = torch.zeros(n,2*self.d)
-        pi = torch.tensor(math.pi)
+        pi = torch.tensor(np.pi)
 
         for i in range(n):
             for j in range(self.d):
-                encoded[i,2*j] = torch.cos(pi*x[i]*2**j)
-                encoded[i,2*j+1] = torch.sin(pi*x[i]*2**j)
+                encoded[i,2*j] = torch.cos(pi*x[i]*2.0**j)
+                encoded[i,2*j+1] = torch.sin(pi*x[i]*2.0**j)
         
         #encoded = x.apply_(self.fourier)
         return encoded
 
 
 class NeuralNet(nn.Module):
-    def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = True):
+    def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = False):
         super(NeuralNet, self).__init__()
 
         #fourier encoder 
@@ -51,7 +58,7 @@ class NeuralNet(nn.Module):
         if self.encode : 
             self.input_dimension = 2*self.encoder.d
         else:
-            self.input_dimension = 1
+            self.input_dimension = input_dimension
         # Number of output dimensions m
         self.output_dimension = output_dimension
         # Number of neurons per layer
@@ -59,7 +66,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Sin()
+        self.activation = Snake()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -235,6 +242,13 @@ def eigenTest(pinn,training_set_b, training_set_c, input_c_ ,eigenmax = 20.0):
 
     return true_sol_errs,hists
 
+def testEncoding():
+    encoder = Encoder(d = 4)
+    test_set = torch.tensor([0.0,1.0]).reshape(-1,1)
+    result = encoder(test_set)
+    true_result = torch.tensor([[1,0,1,0,1,0,1,0],[-1,0,1,0,1,0,1,0]]).type('torch.FloatTensor')
+    #return torch.isclose(result,true_result)
+    return result - true_result
 
 #Initialize PINN
 pinn = Pinn()
@@ -242,14 +256,16 @@ pinn = Pinn()
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 300
+n_coll = 8192
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
 training_set_b = DataLoader(torch.utils.data.TensorDataset(input_b_, output_b_), batch_size=2, shuffle=False)
 training_set_c = DataLoader(torch.utils.data.TensorDataset(input_c_, output_c_), batch_size=n_coll, shuffle=False)
 
+#print(testEncoding())
 
+"""
 fit_with_lam(pinn,training_set_b, training_set_c, eigen = 1.0)
 #show numerical solution
 pred = pinn.approximate_solution(input_c_)
@@ -257,8 +273,8 @@ pred = pred.detach().numpy()
 plt.scatter(input_c_,pred,marker = ".")
 plt.ylim(min(pred),max(pred))
 plt.show()
+"""
 
-
-#true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
+true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
 
 # %%
