@@ -9,6 +9,8 @@ from torch.utils.data import DataLoader
 import torch.linalg as tl
 import numpy.linalg as nl
 
+device = torch.device("cpu")
+
 class Sin(nn.Module):
     #sin activation function
     def __init__(self, ):
@@ -126,7 +128,7 @@ class Pinn:
     def __init__(self, eigen = 1.0, hidden = 4, neurons = 20):
         self.domain_extrema = torch.tensor([0, 2*np.pi])
 
-        self.approximate_solution = NeuralNet(input_dimension=1, output_dimension=1, n_hidden_layers=hidden, neurons=neurons)
+        self.approximate_solution = NeuralNet(input_dimension=1, output_dimension=1, n_hidden_layers=hidden, neurons=neurons).to(device)
 
         torch.manual_seed(12)
         init_xavier(self.approximate_solution)
@@ -249,6 +251,7 @@ def testEncoding():
     true_result = torch.tensor([[1,0,1,0,1,0,1,0],[-1,0,1,0,1,0,1,0]]).type('torch.FloatTensor')
     #return torch.isclose(result,true_result)
     return result - true_result
+
 
 #Initialize PINN
 pinn = Pinn()
