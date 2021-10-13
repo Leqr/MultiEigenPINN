@@ -10,6 +10,7 @@ import torch.linalg as tl
 import numpy.linalg as nl
 
 device = torch.device("cpu")
+torch.set_num_threads(12)
 
 class Sin(nn.Module):
     #sin activation function
@@ -26,7 +27,7 @@ class Snake(nn.Module):
 
     def forward(self, x):
         return x + torch.sin(x)**2
-
+"""
 class Encoder(nn.Module):
     def __init__(self,d = 4) -> None:
         super().__init__()
@@ -46,7 +47,24 @@ class Encoder(nn.Module):
         
         #encoded = x.apply_(self.fourier)
         return encoded
+"""
+class Encoder(nn.Module):
+    def __init__(self,d = 4) -> None:
+        super().__init__()
+        self.d = d
+        pi = torch.tensor(np.pi)
+        pows = torch.tensor([pi*2.0**j for j in range(self.d])
 
+    def forward(self,x):
+        #encodes an x tensor of dimension [N,1] into a tensor of dimension [N,2*d] and therefore contains d sin and d cos   
+        
+        n = x.shape[0]
+        encoded = torch.zeros(n,2*self.d)
+
+        encoded[:,0::2] = torch.cos(x*pows)
+        encoded[:,1::2] = torch.sin(x*pows)
+        
+        return encoded
 
 class NeuralNet(nn.Module):
     def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = True):
@@ -54,7 +72,7 @@ class NeuralNet(nn.Module):
 
         #fourier encoder 
         self.encode = encode
-        self.encoder = Encoder(d = 6)
+        self.encoder = Encoder(d = 4)
 
         # Number of input dimensions n
         if self.encode : 
@@ -68,7 +86,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Snake()
+        self.activation = Sin()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -259,17 +277,17 @@ pinn = Pinn()
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 4196
+n_coll = 128
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
 training_set_b = DataLoader(torch.utils.data.TensorDataset(input_b_, output_b_), batch_size=2, shuffle=False)
 training_set_c = DataLoader(torch.utils.data.TensorDataset(input_c_, output_c_), batch_size=n_coll, shuffle=False)
 
-#print(testEncoding())
+print(testEncoding())
 
 
-fit_with_lam(pinn,training_set_b, training_set_c, eigen = 10.0)
+fit_with_lam(pinn,training_set_b, training_set_c, eigen = 1.0)
 #show numerical solution
 pred = pinn.approximate_solution(input_c_)
 pred = pred.detach().numpy()
@@ -278,6 +296,6 @@ plt.ylim(min(pred),max(pred))
 plt.savefig("out.png")
 
 
-true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
+#true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
 
 # %%
