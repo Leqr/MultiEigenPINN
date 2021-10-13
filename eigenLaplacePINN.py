@@ -53,7 +53,7 @@ class Encoder(nn.Module):
         super().__init__()
         self.d = d
         pi = torch.tensor(np.pi)
-        pows = torch.tensor([pi*2.0**j for j in range(self.d])
+        self.pows = torch.tensor([pi*2.0**j for j in range(self.d)])
 
     def forward(self,x):
         #encodes an x tensor of dimension [N,1] into a tensor of dimension [N,2*d] and therefore contains d sin and d cos   
@@ -61,13 +61,13 @@ class Encoder(nn.Module):
         n = x.shape[0]
         encoded = torch.zeros(n,2*self.d)
 
-        encoded[:,0::2] = torch.cos(x*pows)
-        encoded[:,1::2] = torch.sin(x*pows)
+        encoded[:,0::2] = torch.cos(x*self.pows)
+        encoded[:,1::2] = torch.sin(x*self.pows)
         
         return encoded
 
 class NeuralNet(nn.Module):
-    def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = True):
+    def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = False):
         super(NeuralNet, self).__init__()
 
         #fourier encoder 
@@ -143,10 +143,10 @@ def fit(pinns_class, training_set_boundary, training_set_collocation, num_epochs
 
 
 class Pinn:
-    def __init__(self, eigen = 1.0, hidden = 4, neurons = 20):
+    def __init__(self, eigen = 1.0, hidden = 4, neurons = 20,encode = False):
         self.domain_extrema = torch.tensor([0, 2*np.pi])
 
-        self.approximate_solution = NeuralNet(input_dimension=1, output_dimension=1, n_hidden_layers=hidden, neurons=neurons).to(device)
+        self.approximate_solution = NeuralNet(input_dimension=1, output_dimension=1, n_hidden_layers=hidden, neurons=neurons,encode=encode).to(device)
 
         torch.manual_seed(12)
         init_xavier(self.approximate_solution)
@@ -239,12 +239,14 @@ def eigenTest(pinn,training_set_b, training_set_c, input_c_ ,eigenmax = 20.0):
         #compare with true solution
         true_sol = torch.sin((i+1)*input_c_)
         pred = pinn.approximate_solution(input_c_)
+        
         norm_err = float(tl.norm(true_sol - pred)**2)
         if norm_err > 10.0 :
             norm_err = float(tl.norm(true_sol + pred)**2)
             pred = -1.0*pred
         true_sol_errs.append(norm_err)
         print("Error to real solution : ", norm_err)
+        
 
         if True:
             #show numerical solution
@@ -272,30 +274,30 @@ def testEncoding():
 
 
 #Initialize PINN
-pinn = Pinn()
+pinn = Pinn(encode=True)
 
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 128
+n_coll = 256
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
 training_set_b = DataLoader(torch.utils.data.TensorDataset(input_b_, output_b_), batch_size=2, shuffle=False)
 training_set_c = DataLoader(torch.utils.data.TensorDataset(input_c_, output_c_), batch_size=n_coll, shuffle=False)
 
-print(testEncoding())
+#print(testEncoding())
 
-
-fit_with_lam(pinn,training_set_b, training_set_c, eigen = 1.0)
+"""
+fit_with_lam(pinn,training_set_b, training_set_c, eigen = 5.0)
 #show numerical solution
 pred = pinn.approximate_solution(input_c_)
 pred = pred.detach().numpy()
 plt.scatter(input_c_,pred,marker = ".")
 plt.ylim(min(pred),max(pred))
 plt.savefig("out.png")
+"""
 
-
-#true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
+true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=8)
 
 # %%
