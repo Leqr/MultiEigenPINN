@@ -72,7 +72,7 @@ class NeuralNet(nn.Module):
 
         #fourier encoder 
         self.encode = encode
-        self.encoder = Encoder(d = 4)
+        self.encoder = Encoder(d = 8)
 
         # Number of input dimensions n
         if self.encode : 
@@ -86,7 +86,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Snake()
+        self.activation = Sin()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
