@@ -45,14 +45,35 @@ class Encoder(nn.Module):
         encoded[:,1::2] = torch.sin(x*self.pows)
         
         return encoded
+"""
+class Encoder(nn.Module):
 
+    def __init__(self, d_max):
+        super().__init__()
+
+        self.d = d_max
+        self.omega = 2*np.pi*2 ** np.arange(0, self.d)
+
+
+    def forward(self, x):
+
+        pe = torch.zeros(x.shape[0], x.shape[1], 2, self.d)
+        for n_col in range(x.shape[1]):
+
+            for i in range(self.omega.shape[0]):
+                pe[:, n_col, 0, i] = torch.sin(self.omega[i] * x[:, n_col])
+                pe[:, n_col, 1, i] = torch.cos(self.omega[i] * x[:, n_col])
+
+        pe = pe.view(x.shape[0], -1)
+        return pe
+"""
 class NeuralNet(nn.Module):
     def __init__(self, input_dimension, output_dimension, n_hidden_layers, neurons, encode = False):
         super(NeuralNet, self).__init__()
 
         #fourier encoder 
         self.encode = encode
-        self.encoder = Encoder(d = 6)
+        self.encoder = Encoder(d = 4)
 
         # Number of input dimensions n
         if self.encode : 
@@ -66,7 +87,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Sin()
+        self.activation = Snake()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -166,9 +187,9 @@ class Pinn:
         grad_u_x = torch.autograd.grad(u.sum(), input_collocation, create_graph=True)[0][:,0]
         grad_u_xx = torch.autograd.grad(grad_u_x.sum(), input_collocation, create_graph=True)[0][:,0]
 
-        residual = grad_u_xx + u*self.lam**2
+        residual = grad_u_xx/(self.lam**2) + u
         #enforce function normalisation
-        loss_L2 = 10000*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
+        loss_L2 = 10*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
         residual = torch.cat([residual,loss_L2]) 
 
         return residual.reshape(-1, )
@@ -263,7 +284,7 @@ pinn = Pinn(encode=Encode)
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 5000
+n_coll = 512
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
@@ -275,8 +296,8 @@ optimizer_LBFGS = optim.LBFGS(pinn.approximate_solution.parameters(), lr=float(1
 
 #print(testEncoding())
 
-"""
-fit_with_lam(pinn,optimizer_LBFGS,training_set_b, training_set_c, eigen = 3.0)
+
+fit_with_lam(pinn,optimizer_LBFGS,training_set_b, training_set_c, eigen = 1.0)
 #%%
 #show numerical solution
 pred = pinn.approximate_solution(input_c_)
@@ -284,6 +305,6 @@ pred = pred.detach().numpy()
 plt.scatter(input_c_,pred,marker = ".")
 plt.ylim(min(pred),max(pred))
 plt.savefig("out.png")
-"""
 
-true_sol_errs, history = eigenTest(pinn,optimizer_LBFGS,training_set_b, training_set_c, input_c_, eigenmax=20,encode = Encode)
+
+#true_sol_errs, history = eigenTest(pinn,optimizer_LBFGS,training_set_b, training_set_c, input_c_, eigenmax=20,encode = Encode)
