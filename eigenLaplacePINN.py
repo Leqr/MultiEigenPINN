@@ -66,7 +66,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Snake()
+        self.activation = Sin()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -263,7 +263,7 @@ pinn = Pinn(encode=Encode)
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 128
+n_coll = 5000
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
