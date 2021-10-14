@@ -66,7 +66,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Sin()
+        self.activation = Snake()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -233,7 +233,16 @@ def eigenTest(pinn, optimizer_LBFGS, training_set_b, training_set_c, input_c_ ,e
             plt.clf()
         
         #reset the PINN in order to get new initial weight values
-        pinn = Pinn()
+        pinn = Pinn(encode=encode)
+
+        #reset the optimizer
+        optimizer_LBFGS = torch.optim.LBFGS(pinn.approximate_solution.parameters(),
+                lr = optimizer_LBFGS.param_groups[0]['lr'],
+                max_iter = optimizer_LBFGS.param_groups[0]['max_iter'],
+                max_eval = optimizer_LBFGS.param_groups[0]['max_eval'], 
+                history_size=optimizer_LBFGS.param_groups[0]['history_size'],
+                line_search_fn=optimizer_LBFGS.param_groups[0]['line_search_fn'],
+                tolerance_change=optimizer_LBFGS.param_groups[0]['tolerance_change'])
         pinn.lam = i+2
 
     return true_sol_errs,hists
@@ -254,7 +263,7 @@ pinn = Pinn(encode=Encode)
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 8042
+n_coll = 128
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
