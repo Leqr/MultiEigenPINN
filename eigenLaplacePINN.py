@@ -86,7 +86,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Sin()
+        self.activation = Snake()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -219,7 +219,7 @@ class Pinn:
 def fit_with_lam(pinn,training_set_b, training_set_c,eigen = 1.0):
     pinn.lam = eigen
     n_epochs = 1
-    optimizer_LBFGS = optim.LBFGS(pinn.approximate_solution.parameters(), lr=float(1.5), max_iter=1000, max_eval=50000, history_size=150,
+    optimizer_LBFGS = optim.LBFGS(pinn.approximate_solution.parameters(), lr=float(0.5), max_iter=10000, max_eval=50000, history_size=150,
                                 line_search_fn="strong_wolfe",
                                 tolerance_change=1.0 * np.finfo(float).eps)
     hist = fit(pinn, training_set_b, training_set_c, num_epochs=n_epochs, optimizer=optimizer_LBFGS, verbose=True)
@@ -297,7 +297,6 @@ plt.scatter(input_c_,pred,marker = ".")
 plt.ylim(min(pred),max(pred))
 plt.savefig("out.png")
 """
-print("Starting bench")
 true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
 
 # %%
