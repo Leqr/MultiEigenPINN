@@ -27,27 +27,7 @@ class Snake(nn.Module):
 
     def forward(self, x):
         return x + torch.sin(x)**2
-"""
-class Encoder(nn.Module):
-    def __init__(self,d = 4) -> None:
-        super().__init__()
-        self.d = d
 
-    def forward(self,x):
-        #encodes an x tensor of dimension [N,1] into a tensor of dimension [N,2*d] and therefore contains d sin and d cos   
-        
-        n = x.shape[0]
-        encoded = torch.zeros(n,2*self.d)
-        pi = torch.tensor(np.pi)
-
-        for i in range(n):
-            for j in range(self.d):
-                encoded[i,2*j] = torch.cos(pi*x[i]*2.0**j)
-                encoded[i,2*j+1] = torch.sin(pi*x[i]*2.0**j)
-        
-        #encoded = x.apply_(self.fourier)
-        return encoded
-"""
 class Encoder(nn.Module):
     def __init__(self,d = 4) -> None:
         super().__init__()
@@ -72,7 +52,7 @@ class NeuralNet(nn.Module):
 
         #fourier encoder 
         self.encode = encode
-        self.encoder = Encoder(d = 8)
+        self.encoder = Encoder(d = 6)
 
         # Number of input dimensions n
         if self.encode : 
@@ -86,7 +66,7 @@ class NeuralNet(nn.Module):
         # Number of hidden layers
         self.n_hidden_layers = n_hidden_layers
         # Activation function
-        self.activation = Snake()
+        self.activation = Sin()
 
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(self.neurons, self.neurons) for _ in range(n_hidden_layers - 1)])
@@ -148,7 +128,7 @@ class Pinn:
 
         self.approximate_solution = NeuralNet(input_dimension=1, output_dimension=1, n_hidden_layers=hidden, neurons=neurons,encode=encode).to(device)
 
-        torch.manual_seed(12)
+        torch.manual_seed(10)
         init_xavier(self.approximate_solution)
 
         #eigenvalue
@@ -202,37 +182,31 @@ class Pinn:
         u_train_b, u_pred_b = self.apply_boundary_conditions(inp_train_b, u_train_b)
 
         r_int = self.compute_pde_residual(inp_train_c)  
-        r_sb = u_train_b - u_pred_b
+        r_b = u_train_b - u_pred_b
 
-        loss_sb = torch.mean(r_sb**2)
+        loss_b = torch.mean(r_b**2)
         loss_int = torch.mean(r_int**2)
 
         lambda_b = 1
         lambda_int = 10
 
-        loss = torch.log10(lambda_b*loss_sb + lambda_int*loss_int) 
+        loss = torch.log10(lambda_b*loss_b + lambda_int*loss_int) 
         if verbose :
-            print("Total loss: ", round(loss.item(), 4), "| PDE Log Residual: ", round(torch.log10(loss_sb).item(), 4), "| Boundary Log Error: ", round(torch.log10(loss_int).item(), 4))
+            print("Total loss: ", round(loss.item(), 4), "| PDE Log Residual: ", round(torch.log10(loss_int).item(), 4), "| Boundary Log Error: ", round(torch.log10(loss_b).item(), 4))
 
         return loss
 
-def fit_with_lam(pinn,training_set_b, training_set_c,eigen = 1.0):
+def fit_with_lam(pinn, optimizer_LBFGS, training_set_b, training_set_c,eigen = 1.0):
     pinn.lam = eigen
     n_epochs = 1
-    optimizer_LBFGS = optim.LBFGS(pinn.approximate_solution.parameters(), lr=float(0.5), max_iter=10000, max_eval=50000, history_size=150,
-                                line_search_fn="strong_wolfe",
-                                tolerance_change=1.0 * np.finfo(float).eps)
     hist = fit(pinn, training_set_b, training_set_c, num_epochs=n_epochs, optimizer=optimizer_LBFGS, verbose=True)
 
-def eigenTest(pinn,training_set_b, training_set_c, input_c_ ,eigenmax = 20.0):
+def eigenTest(pinn, optimizer_LBFGS, training_set_b, training_set_c, input_c_ ,eigenmax = 20.0, encode = False):
     hists = []
     true_sol_errs = [] 
     for i in range(eigenmax):
         print("Lambda = ",i+1)
         n_epochs = 1
-        optimizer_LBFGS = optim.LBFGS(pinn.approximate_solution.parameters(), lr=float(1.5), max_iter=1000, max_eval=50000, history_size=150,
-                                    line_search_fn="strong_wolfe",
-                                    tolerance_change=1.0 * np.finfo(float).eps)
         hist = fit(pinn, training_set_b, training_set_c, num_epochs=n_epochs, optimizer=optimizer_LBFGS, verbose=False)
         hists.append(hist)
 
@@ -274,22 +248,27 @@ def testEncoding():
 
 
 #Initialize PINN
-pinn = Pinn(encode=True)
+Encode = False
+pinn = Pinn(encode=Encode)
 
 # Generate S_sb, S_tb, S_int
 input_b_, output_b_ = pinn.add_boundary_points()  # S_sb
 
-n_coll = 8192
+n_coll = 8042
 input_c_, output_c_ = pinn.add_collocation_points(n_coll)  # S_int
 
 #create dataset for pytorch model
 training_set_b = DataLoader(torch.utils.data.TensorDataset(input_b_, output_b_), batch_size=2, shuffle=False)
 training_set_c = DataLoader(torch.utils.data.TensorDataset(input_c_, output_c_), batch_size=n_coll, shuffle=False)
+optimizer_LBFGS = optim.LBFGS(pinn.approximate_solution.parameters(), lr=float(1.0), max_iter=30000, max_eval=50000, history_size=150,
+                                    line_search_fn="strong_wolfe",
+                                    tolerance_change=1.0 * np.finfo(float).eps)
 
 #print(testEncoding())
 
 """
-fit_with_lam(pinn,training_set_b, training_set_c, eigen = 5.0)
+fit_with_lam(pinn,optimizer_LBFGS,training_set_b, training_set_c, eigen = 3.0)
+#%%
 #show numerical solution
 pred = pinn.approximate_solution(input_c_)
 pred = pred.detach().numpy()
@@ -297,6 +276,5 @@ plt.scatter(input_c_,pred,marker = ".")
 plt.ylim(min(pred),max(pred))
 plt.savefig("out.png")
 """
-true_sol_errs, history = eigenTest(pinn,training_set_b, training_set_c, input_c_, eigenmax=20)
 
-# %%
+true_sol_errs, history = eigenTest(pinn,optimizer_LBFGS,training_set_b, training_set_c, input_c_, eigenmax=20,encode = Encode)
