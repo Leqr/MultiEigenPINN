@@ -50,7 +50,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-from EquationModels.ForwardProblem.WaveEq import EquationClass
+from EquationModels.ForwardProblem.EigenLaplEq import EquationClass
 
 from FitClass import *
 from ModClass import *

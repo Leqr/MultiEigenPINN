@@ -19,7 +19,7 @@ network_properties = {
     "batch_size": [(N_coll + N_u + N_int)],
     "epochs": [1],
     "max_iter": [500],
-    "activation": ["snake"],
+    "activation": ["snake","sin"],
     "optimizer": ["LBFGS"]
 }
 shuffle = "true"

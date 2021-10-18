@@ -53,7 +53,7 @@ def initialize_inputs(len_sys_argv):
         n_int_ = 0
 
         # Additional Info
-        folder_path_ = "Wave1dTest"
+        folder_path_ = "EigenLapl1dTest"
         validation_size_ = 0.0  # useless
         network_properties_ = {
             "hidden_layers": 4,
@@ -63,8 +63,8 @@ def initialize_inputs(len_sys_argv):
             "regularization_parameter": 0,
             "batch_size": (n_coll_ + n_u_ + n_int_),
             "epochs": 1,
-            "max_iter": 2500,
-            "activation": "sin",
+            "max_iter": 10000,
+            "activation": "snake",
             "optimizer": "LBFGS"  # ADAM
         }
         retrain_ = 32
@@ -229,9 +229,11 @@ print("################################################")
 images_path = folder_path + "/Images"
 model_path = folder_path + "/TrainedModel"
 
-os.mkdir(folder_path)
-os.mkdir(images_path)
-os.mkdir(model_path)
+if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
+    os.mkdir(folder_path)
+    os.mkdir(images_path)
+    os.mkdir(model_path)
+
 L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
 Ec.plotting(model, images_path, extrema, None)
 
