@@ -57,7 +57,7 @@ from ModClass import *
 from DatasetClass import *
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-rc('text', usetex=True)
+#rc('text', usetex=True)
 # plt.rc('text.latex', preamble=r'\usepackage{euscript}')
 SMALL_SIZE = 8
 MEDIUM_SIZE = 14

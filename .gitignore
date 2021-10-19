@@ -141,7 +141,11 @@ dmypy.json
 lsf*
 
 #cluster related files
-.sh
+job_simple.sh
+SamPINN/ensemble.sh
 
 .txt
 .png
+
+vpinn/
+figures/
