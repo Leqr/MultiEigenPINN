@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 #pdf's
-.pdf
+*.pdf
 
 # Remove IntelliJ idea
 .idea/
@@ -137,15 +137,13 @@ dmypy.json
 # MAC
 .DS_Store
 
-#lsf
-lsf*
-
 #cluster related files
-job_simple.sh
-SamPINN/ensemble.sh
-
-.txt
-.png
+*.sh
+*.txt
+*.png
+*.csv
+lsf*
+*.pkl
 
 vpinn/
 figures/
