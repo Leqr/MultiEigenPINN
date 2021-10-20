@@ -48,8 +48,8 @@ def initialize_inputs(len_sys_argv):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 4096
-        n_u_ = 2048
+        n_coll_ = 10000
+        n_u_ = 2
         n_int_ = 0
 
         # Additional Info
@@ -58,9 +58,10 @@ def initialize_inputs(len_sys_argv):
         network_properties_ = {
             "hidden_layers": 4,
             "neurons": 20,
-            "residual_parameter": 0.1,
-            "kernel_regularizer": 2,
-            "regularization_parameter": 0,
+            "residual_parameter": 100,
+            "kernel_regularizer": 2.0,
+            "normalization_parameter" : 10000,
+            "regularization_parameter": 0.0,
             "batch_size": (n_coll_ + n_u_ + n_int_),
             "epochs": 1,
             "max_iter": 10000,

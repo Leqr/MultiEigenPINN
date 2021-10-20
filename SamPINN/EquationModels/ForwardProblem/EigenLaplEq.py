@@ -7,7 +7,7 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
 
-    def __init__(self, ):
+    def __init__(self, eigenvalue = 13.0):
         EquationBaseClass.__init__(self)
 
         self.type_of_points = "sobol"
@@ -25,7 +25,8 @@ class EquationClass(EquationBaseClass):
                                           self.extrema_values,
                                           self.type_of_points)
 
-        self.lam = 15.0
+        self.lam = eigenvalue
+
 
     def add_collocation_points(self, n_coll, random_seed):
         return self.square_domain.add_collocation_points(n_coll, random_seed)
@@ -41,7 +42,7 @@ class EquationClass(EquationBaseClass):
 
         self.square_domain.apply_boundary_conditions(model, x_b_train, u_b_train, u_pred_var_list, u_train_var_list)
 
-    def compute_res(self, network, x_f_train, solid_object):
+    def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10):
         x_f_train.requires_grad = True
         u = network(x_f_train)[:, 0].reshape(-1, )
 
@@ -50,8 +51,8 @@ class EquationClass(EquationBaseClass):
 
         residual = grad_u_xx + (self.lam**2)*u
         #enforce function normalisation
-        loss_L2 = 1000*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
-        residual = torch.cat([residual,loss_L2]).reshape(-1,)
+        norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
+        residual = torch.cat([residual,norm_loss]).reshape(-1,)
 
         return residual
 

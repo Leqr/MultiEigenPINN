@@ -60,6 +60,7 @@ class Pinns(nn.Module):
         self.neurons = int(network_properties["neurons"])
         self.lambda_residual = float(network_properties["residual_parameter"])
         self.kernel_regularizer = int(network_properties["kernel_regularizer"])
+        self.lambda_norm = network_properties["normalization_parameter"]
         self.regularization_param = float(network_properties["regularization_parameter"])
         self.num_epochs = int(network_properties["epochs"])
         self.act_string = str(network_properties["activation"])

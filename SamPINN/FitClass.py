@@ -11,6 +11,7 @@ class CustomLoss(torch.nn.Module):
     def forward(self, Ec, network, x_u_train, u_train, x_b_train, u_b_train, x_f_train, dataclass):
         lambda_residual = network.lambda_residual
         lambda_reg = network.regularization_param
+        lambda_norm = network.lambda_norm
         order_regularizer = network.kernel_regularizer
 
         u_pred_var_list = list()
@@ -26,13 +27,13 @@ class CustomLoss(torch.nn.Module):
 
         assert not torch.isnan(u_pred_tot_vars).any()
 
-        res = Ec.compute_res(network, x_f_train, None).to(Ec.device)
+        res = Ec.compute_res(network, x_f_train, None, lambda_norm).to(Ec.device)
 
         loss_res = (torch.mean(abs(res) ** 2))
         loss_vars = (torch.mean(abs(u_pred_tot_vars - u_train_tot_vars) ** 2))
         loss_reg = regularization(network, order_regularizer)
 
-        loss_v = torch.log10(lambda_residual * loss_vars + loss_res + lambda_reg * loss_reg)
+        loss_v = torch.log10(loss_vars + lambda_residual * loss_res + lambda_reg * loss_reg)
         print("Total Loss:", loss_v.detach().cpu().numpy().round(4), "| Function Loss:", torch.log10(loss_vars).detach().cpu().numpy().round(4), "| PDE Loss:", torch.log10(loss_res).detach().cpu().numpy().round(4), "\n")
 
         return loss_v, loss_vars, loss_res

@@ -13,12 +13,13 @@ validation_size = 0.0
 network_properties = {
     "hidden_layers": [4],
     "neurons": [20],
-    "residual_parameter": [1,10,100,1000],
-    "kernel_regularizer": [1,10,100,1000],
-    "regularization_parameter": [0],
+    "residual_parameter": [1,10,100,1000,10000],
+    "kernel_regularizer": [1.0],
+    "normalization_parameter" : [10000,100000,1000000],
+    "regularization_parameter": [0.0],
     "batch_size": [(N_coll + N_u + N_int)],
     "epochs": [1],
-    "max_iter": [10000],
+    "max_iter": [100000],
     "activation": ["snake"],
     "optimizer": ["LBFGS"]
 }
@@ -42,12 +43,13 @@ for setup in settings:
         "neurons": setup[1],
         "residual_parameter": setup[2],
         "kernel_regularizer": setup[3],
-        "regularization_parameter": setup[4],
-        "batch_size": setup[5],
-        "epochs": setup[6],
-        "max_iter": setup[7],
-        "activation": setup[8],
-        "optimizer": setup[9]
+        "normalization_parameter" : setup[4],
+        "regularization_parameter" : setup[5],
+        "batch_size": setup[6],
+        "epochs": setup[7],
+        "max_iter": setup[8],
+        "activation": setup[9],
+        "optimizer": setup[10]
     }
 
     arguments = list()
