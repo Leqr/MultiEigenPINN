@@ -13,13 +13,13 @@ validation_size = 0.0
 network_properties = {
     "hidden_layers": [4],
     "neurons": [20],
-    "residual_parameter": [0],
-    "kernel_regularizer": [0],
+    "residual_parameter": [1,10,100,1000],
+    "kernel_regularizer": [1,10,100,1000],
     "regularization_parameter": [0],
     "batch_size": [(N_coll + N_u + N_int)],
     "epochs": [1],
-    "max_iter": [1000,10000],
-    "activation": ["snake","sin"],
+    "max_iter": [10000],
+    "activation": ["snake"],
     "optimizer": ["LBFGS"]
 }
 shuffle = "true"

@@ -25,7 +25,7 @@ class EquationClass(EquationBaseClass):
                                           self.extrema_values,
                                           self.type_of_points)
 
-        self.lam = 3.0
+        self.lam = 15.0
 
     def add_collocation_points(self, n_coll, random_seed):
         return self.square_domain.add_collocation_points(n_coll, random_seed)
