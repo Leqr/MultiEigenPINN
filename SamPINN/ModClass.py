@@ -26,6 +26,27 @@ class Snake(nn.Module):
     def forward(self, x):
         return x + torch.sin(self.alpha * x) ** 2 / self.alpha
 
+class Encoder(nn.Module):
+
+    def __init__(self, d_max):
+        super().__init__()
+
+        self.d = d_max
+        self.omega = 2*np.pi*2 ** np.arange(0, self.d)
+
+
+    def forward(self, x):
+
+        pe = torch.zeros(x.shape[0], x.shape[1], 2, self.d)
+        for n_col in range(x.shape[1]):
+
+            for i in range(self.omega.shape[0]):
+                pe[:, n_col, 0, i] = torch.sin(self.omega[i] * x[:, n_col])
+                pe[:, n_col, 1, i] = torch.cos(self.omega[i] * x[:, n_col])
+
+        pe = pe.view(x.shape[0], -1)
+        return pe
+
 
 def activation(name):
     if name in ['tanh', 'Tanh']:
@@ -93,3 +114,4 @@ def init_xavier(model):
             # m.bias.data.fill_(0)
 
     model.apply(init_weights)
+
