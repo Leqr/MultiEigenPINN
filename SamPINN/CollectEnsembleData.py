@@ -61,6 +61,7 @@ for base_path in base_path_list:
     sensitivity_df = pd.DataFrame(columns=["batch_size",
                                            "regularization_parameter",
                                            "kernel_regularizer",
+                                           "normalization_parameter",
                                            "neurons",
                                            "hidden_layers",
                                            "residual_parameter",
@@ -116,8 +117,8 @@ for base_path in base_path_list:
 
     sensitivity_df = sensitivity_df.sort_values(selection_criterion)
     best_setup = sensitivity_df.iloc[0]
-    best_setup.to_csv(base_path + "/best.csv", header=0, index=False)
-    # print(sensitivity_df)
+    best_setup.to_csv(base_path + "/best.csv", header=1, index=False)
+    #print(sensitivity_df)
     print("Best Setup:", best_setup["setup"])
     print(best_setup)
 
@@ -134,6 +135,7 @@ for base_path in base_path_list:
                 "neurons",
                 "residual_parameter",
                 "kernel_regularizer",
+                "normalization_parameter",
                 "regularization_parameter",
                 "activation"]
 
@@ -141,6 +143,7 @@ for base_path in base_path_list:
                    "neurons",
                    "residual-parameter",
                    "kernel-regularizer",
+                   "normalization_parameter",
                    "regularization-parameter",
                    "activation"]
     for var in var_list:

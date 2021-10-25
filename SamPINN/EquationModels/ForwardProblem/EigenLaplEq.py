@@ -7,7 +7,7 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
 
-    def __init__(self, eigenvalue = 13.0):
+    def __init__(self, eigenvalue = 10.0):
         EquationBaseClass.__init__(self)
 
         self.type_of_points = "sobol"
