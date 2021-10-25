@@ -68,7 +68,7 @@ for base_path in base_path_list:
                                            "error_train",
                                            "error_val",
                                            "error_test"])
-    # print(sensitivity_df)
+    print(sensitivity_df)
 
     selection_criterion = "selection"
     eval_criterion = "rel_L2_norm"
