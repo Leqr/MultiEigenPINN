@@ -7,7 +7,7 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
 
-    def __init__(self, eigenvalue = 10.0):
+    def __init__(self, eigenvalue = 0.69):
         EquationBaseClass.__init__(self)
 
         self.type_of_points = "sobol"
@@ -25,7 +25,8 @@ class EquationClass(EquationBaseClass):
                                           self.extrema_values,
                                           self.type_of_points)
 
-        self.lam = eigenvalue
+        #use a tensor so that it can be made into a trainable parameter
+        self.lam = torch.tensor(eigenvalue)
 
 
     def add_collocation_points(self, n_coll, random_seed):

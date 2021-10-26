@@ -73,8 +73,12 @@ def activation(name):
 
 class Pinns(nn.Module):
 
-    def __init__(self, input_dimension, output_dimension, network_properties):
+    def __init__(self, input_dimension, output_dimension, network_properties,Ec = None):
         super(Pinns, self).__init__()
+
+        #eigenvalue problems
+        self.lam = nn.Parameter(Ec.lam,requires_grad=True)
+
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
         self.n_hidden_layers = int(network_properties["hidden_layers"])
@@ -94,6 +98,7 @@ class Pinns(nn.Module):
         self.output_layer = nn.Linear(self.neurons, self.output_dimension)
 
         self.activation = activation(self.act_string)
+
 
     def forward(self, x):
         x = self.activation(self.input_layer(x))

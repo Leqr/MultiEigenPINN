@@ -7,6 +7,7 @@ class CustomLoss(torch.nn.Module):
 
     def __init__(self):
         super(CustomLoss, self).__init__()
+        
 
     def forward(self, Ec, network, x_u_train, u_train, x_b_train, u_b_train, x_f_train, dataclass):
         lambda_residual = network.lambda_residual
@@ -42,7 +43,6 @@ class CustomLoss(torch.nn.Module):
 def fit(Ec, model, training_set_class, verbose=False):
     num_epochs = model.num_epochs
     optimizer = model.optimizer
-
     train_losses = list([np.NAN, np.NAN, np.NAN])
     freq = 50
 
@@ -53,6 +53,7 @@ def fit(Ec, model, training_set_class, verbose=False):
     model.train()
 
     def closure():
+        #print(list(model.parameters()))
         optimizer.zero_grad()
         loss_f, loss_vars, loss_pde = CustomLoss().forward(Ec, model, x_u_train_, u_train_, x_b_train_, u_b_train_, x_coll_train_, training_set_class)
         loss_f.backward()

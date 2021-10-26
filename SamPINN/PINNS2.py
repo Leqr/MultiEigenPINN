@@ -1,4 +1,5 @@
 from ImportFile import *
+import itertools
 
 torch.manual_seed(42)
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -48,7 +49,7 @@ def initialize_inputs(len_sys_argv):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 10000
+        n_coll_ = 3000
         n_u_ = 2
         n_int_ = 0
 
@@ -58,13 +59,13 @@ def initialize_inputs(len_sys_argv):
         network_properties_ = {
             "hidden_layers": 4,
             "neurons": 20,
-            "residual_parameter": 100,
-            "kernel_regularizer": 2.0,
-            "normalization_parameter" : 10000,
+            "residual_parameter": 1,
+            "kernel_regularizer": 1.0,
+            "normalization_parameter" : 100000,
             "regularization_parameter": 0.0,
             "batch_size": (n_coll_ + n_u_ + n_int_),
             "epochs": 1,
-            "max_iter": 10000,
+            "max_iter": 100000,
             "activation": "snake",
             "optimizer": "LBFGS"  # ADAM
         }
@@ -187,7 +188,13 @@ training_set_class.assemble_dataset()
 # #############################################################################################################################################################
 # Model Creation
 additional_models = None
-model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension, network_properties=network_properties)
+model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension, network_properties=network_properties,Ec=Ec)
+
+"""
+eigenvalue = nn.Parameter(Ec.lam)
+total_parameters = itertools.chain(model.parameters(),(eigenvalue,))
+print(list(total_parameters))
+"""
 
 # #############################################################################################################################################################
 # Weights Initialization
@@ -237,5 +244,8 @@ if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
 
 L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
 Ec.plotting(model, images_path, extrema, None)
+
+eigenval = model.lam.detach().numpy()
+print("Eigenvalue : {}".format(eigenval))
 
 dump_to_file()
