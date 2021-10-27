@@ -1,5 +1,4 @@
 from ImportFile import *
-import itertools
 
 torch.manual_seed(42)
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -49,7 +48,7 @@ def initialize_inputs(len_sys_argv):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 3000
+        n_coll_ = 4000
         n_u_ = 2
         n_int_ = 0
 
@@ -173,36 +172,33 @@ print("Time Dimension", time_dimension)
 print("Parameter Dimensions", parameter_dimensions)
 print("\n######################################")
 
-if network_properties["optimizer"] == "LBFGS" and network_properties["epochs"] != 1 and network_properties["max_iter"] == 1 and (batch_dim == "full" or batch_dim == N_train):
+if network_properties["optimizer"] == "LBFGS" and network_properties["epochs"] != 1 and \
+        network_properties["max_iter"] == 1 and (batch_dim == "full" or batch_dim == N_train):
     print(bcolors.WARNING + "WARNING: you set max_iter=1 and epochs=" + str(network_properties["epochs"]) + " with a LBFGS optimizer.\n"
-                                                                                                            "This will work but it is not efficient in full batch mode. Set max_iter = " + str(network_properties["epochs"]) + " and epochs=1. instead" + bcolors.ENDC)
+        "This will work but it is not efficient in full batch mode. Set max_iter = " + str(network_properties["epochs"]) +
+        " and epochs=1. instead" + bcolors.ENDC)
 
 if batch_dim == "full":
     batch_dim = N_train
 
-# #############################################################################################################################################################
+# ###################################################################################
 # Dataset Creation
-training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int_train, batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)
+training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
+                                   batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)
 training_set_class.assemble_dataset()
 
-# #############################################################################################################################################################
+# ####################################################################################
 # Model Creation
 additional_models = None
-model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension, network_properties=network_properties,Ec=Ec)
+model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension, network_properties=network_properties)
 
-"""
-eigenvalue = nn.Parameter(Ec.lam)
-total_parameters = itertools.chain(model.parameters(),(eigenvalue,))
-print(list(total_parameters))
-"""
-
-# #############################################################################################################################################################
+# ####################################################################################
 # Weights Initialization
 torch.manual_seed(retrain)
 init_xavier(model)
 
 
-# #############################################################################################################################################################
+# ####################################################################################
 # Model Training
 start = time.time()
 print("Fitting Model")
@@ -232,7 +228,7 @@ print("\n################################################")
 print("Final Training Loss:", final_error_train)
 print("################################################")
 
-# #############################################################################################################################################################
+# #####################################################################################
 # Plotting ang Assessing Performance
 images_path = folder_path + "/Images"
 model_path = folder_path + "/TrainedModel"

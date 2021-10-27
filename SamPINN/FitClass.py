@@ -25,9 +25,7 @@ class CustomLoss(torch.nn.Module):
 
         u_pred_tot_vars = torch.cat(u_pred_var_list, 0).to(Ec.device)
         u_train_tot_vars = torch.cat(u_train_var_list, 0).to(Ec.device)
-
         assert not torch.isnan(u_pred_tot_vars).any()
-
         res = Ec.compute_res(network, x_f_train, None, lambda_norm).to(Ec.device)
 
         loss_res = (torch.mean(abs(res) ** 2))

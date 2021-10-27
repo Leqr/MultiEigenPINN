@@ -32,7 +32,7 @@ class Encoder(nn.Module):
         super().__init__()
 
         self.d = d_max
-        self.omega = 2*np.pi*2 ** np.arange(0, self.d)
+        self.omega = 2 ** np.arange(0, self.d)
 
 
     def forward(self, x):
@@ -73,34 +73,52 @@ def activation(name):
 
 class Pinns(nn.Module):
 
-    def __init__(self, input_dimension, output_dimension, network_properties,Ec = None):
+    def __init__(self, input_dimension, output_dimension, network_properties):
         super(Pinns, self).__init__()
 
         #eigenvalue problems
-        self.lam = nn.Parameter(Ec.lam,requires_grad=True)
+        max_eigenvalue = 10.0
+        self.lam0 = max_eigenvalue*torch.rand(1)
+        self.lam = nn.Parameter(self.lam0,requires_grad=True)
 
-        self.input_dimension = input_dimension
+        # positional encoding
+        self.encode = True
+        if self.encode:
+            self.encoder = Encoder(d_max=6)
+            self.input_dimension = int(2*self.encoder.d)
+        else:
+            self.input_dimension = input_dimension
+
+        #neural net architecture
         self.output_dimension = output_dimension
         self.n_hidden_layers = int(network_properties["hidden_layers"])
         self.neurons = int(network_properties["neurons"])
+
+        #weight losses
         self.lambda_residual = float(network_properties["residual_parameter"])
         self.kernel_regularizer = int(network_properties["kernel_regularizer"])
         self.lambda_norm = network_properties["normalization_parameter"]
         self.regularization_param = float(network_properties["regularization_parameter"])
+
+        #param
         self.num_epochs = int(network_properties["epochs"])
         self.act_string = str(network_properties["activation"])
         self.optimizer = network_properties["optimizer"]
 
+        #layers
         self.input_layer = nn.Linear(self.input_dimension, self.neurons)
 
         self.hidden_layers = nn.ModuleList(
             [nn.Linear(self.neurons, self.neurons) for _ in range(self.n_hidden_layers - 1)])
         self.output_layer = nn.Linear(self.neurons, self.output_dimension)
 
+        #activation
         self.activation = activation(self.act_string)
 
 
     def forward(self, x):
+        if self.encode:
+            x = self.encoder(x)
         x = self.activation(self.input_layer(x))
         for k, l in enumerate(self.hidden_layers):
             x = self.activation(l(x))

@@ -57,6 +57,9 @@ class EquationClass(EquationBaseClass):
         norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
         residual = torch.cat([residual,norm_loss]).reshape(-1,)
         assert not torch.isnan(residual).any()
+
+        print("Eigenvalue = {}".format(network.lam.detach().numpy()[0]))
+
         return residual
 
     def exact(self, x):
