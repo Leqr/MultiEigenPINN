@@ -1,3 +1,4 @@
+import torch
 from ImportFile import *
 from EquationBaseClass import EquationBaseClass
 from GeneratorPoints import generator_points
@@ -7,7 +8,7 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
 
-    def __init__(self, eigenvalue = 0.69):
+    def __init__(self, eigenvalue = 1.0):
         EquationBaseClass.__init__(self)
 
         self.type_of_points = "sobol"
@@ -26,7 +27,7 @@ class EquationClass(EquationBaseClass):
                                           self.type_of_points)
 
         #use a tensor so that it can be made into a trainable parameter
-        self.lam = torch.tensor(eigenvalue)
+        self.lam = torch.tensor(1.0)
 
 
     def add_collocation_points(self, n_coll, random_seed):
@@ -50,11 +51,12 @@ class EquationClass(EquationBaseClass):
         grad_u_x = torch.autograd.grad(u.sum(), x_f_train, create_graph=True)[0][:,0]
         grad_u_xx = torch.autograd.grad(grad_u_x.sum(), x_f_train, create_graph=True)[0][:,0]
 
-        residual = grad_u_xx + (self.lam**2)*u
+        residual = grad_u_xx + (network.lam**2)*u
+
         #enforce function normalisation
         norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
         residual = torch.cat([residual,norm_loss]).reshape(-1,)
-
+        assert not torch.isnan(residual).any()
         return residual
 
     def exact(self, x):
