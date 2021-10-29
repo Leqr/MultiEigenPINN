@@ -73,7 +73,7 @@ def activation(name):
 
 class Pinns(nn.Module):
 
-    def __init__(self, input_dimension, output_dimension, network_properties):
+    def __init__(self, input_dimension, output_dimension, network_properties, other_networks = None):
         super(Pinns, self).__init__()
 
         #eigenvalue problems
@@ -82,7 +82,7 @@ class Pinns(nn.Module):
         self.lam = nn.Parameter(self.lam0,requires_grad=True)
 
         # positional encoding
-        self.encode = True
+        self.encode = False
         if self.encode:
             self.encoder = Encoder(d_max=6)
             self.input_dimension = int(2*self.encoder.d)
@@ -115,6 +115,9 @@ class Pinns(nn.Module):
         #activation
         self.activation = activation(self.act_string)
 
+        #full_solve
+        self.other_networks = other_networks
+
 
     def forward(self, x):
         if self.encode:
@@ -123,6 +126,11 @@ class Pinns(nn.Module):
         for k, l in enumerate(self.hidden_layers):
             x = self.activation(l(x))
         return self.output_layer(x)
+
+    def evaluate_other_functions(self,x_coll):
+        self.other_solutions = dict()
+        for eigen,sol in self.other_networks.items():
+            self.other_solutions[eigen] = sol(x_coll)
 
 
 def init_xavier(model):

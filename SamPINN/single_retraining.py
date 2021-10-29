@@ -45,16 +45,16 @@ for retrain in range(len(seeds)):
     if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
         if cluster == "true":
             if GPU != "None":
-                string_to_exec = "bsub -W 4:00 -R \"rusage[mem=16384,ngpus_excl_p=1]\" -R \"select[gpu_model0==" + GPU + "]\" python3 PINNS2.py  "
+                string_to_exec = "bsub -W 4:00 -R \"rusage[mem=16384,ngpus_excl_p=1]\" -R \"select[gpu_model0==" + GPU + "]\" python3 SingleSolve.py  "
                 print(string_to_exec)
             else:
-                string_to_exec = "bsub -W 4:00 -R \"rusage[mem=8192]\" python3 PINNS2.py  "
+                string_to_exec = "bsub -W 4:00 -R \"rusage[mem=8192]\" python3 SingleSolve.py  "
         else:
-            string_to_exec = "python3 PINNS2.py "
+            string_to_exec = "python3 SingleSolve.py "
         for arg in arguments:
             string_to_exec = string_to_exec + " " + arg
         os.system(string_to_exec)
     else:
         python = os.environ['PYTHON36']
-        p = subprocess.Popen([python, "PINNS2.py"] + arguments)
+        p = subprocess.Popen([python, "SingleSolve.py"] + arguments)
         p.wait()

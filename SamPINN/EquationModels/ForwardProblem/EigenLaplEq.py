@@ -8,7 +8,7 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
 
-    def __init__(self, eigenvalue = 1.0):
+    def __init__(self):
         EquationBaseClass.__init__(self)
 
         self.type_of_points = "sobol"
@@ -55,10 +55,24 @@ class EquationClass(EquationBaseClass):
 
         #enforce function normalisation
         norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
-        residual = torch.cat([residual,norm_loss]).reshape(-1,)
+
+        #othogonal condition when doing a full_solve
+        loss_orth = torch.tensor([0.0])
+        print(network.other_networks)
+        if network.other_networks is not None:
+            lambda_orth = 100.0
+            for eig, func in network.other_networks.items():
+                assert func.shape == u.shape
+                loss_orth += torch.dot(func,u)
+            loss_orth = lambda_orth*loss_orth
+
+        residual = torch.cat([residual, norm_loss, loss_orth]).reshape(-1, )
         assert not torch.isnan(residual).any()
 
-        print("Eigenvalue = {}".format(network.lam.detach().numpy()[0]))
+        #show eigenvalue
+        trained_lam = network.lam.detach().numpy()[0]
+        print("Eigenvalue = {}".format(trained_lam))
+        self.lam = trained_lam
 
         return residual
 
@@ -82,10 +96,10 @@ class EquationClass(EquationBaseClass):
         test_out = model(test_inp).detach().numpy().reshape(-1, 1)
         assert (Exact.shape[1] == test_out.shape[1])
         L2_test = np.sqrt(np.mean((Exact - test_out) ** 2))
-        print("Error Test:", L2_test)
+        print("Error TestPosEnc:", L2_test)
 
         rel_L2_test = L2_test / np.sqrt(np.mean(Exact ** 2))
-        print("Relative Error Test:", rel_L2_test)
+        print("Relative Error TestPosEnc:", rel_L2_test)
 
         if images_path is not None:
             plt.figure()
@@ -109,4 +123,5 @@ class EquationClass(EquationBaseClass):
         plt.ylim(min(pred),max(pred))
         plt.legend()
         plt.savefig(images_path + "/Samples.png", dpi=500)
+
 

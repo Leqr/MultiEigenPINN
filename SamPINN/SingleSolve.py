@@ -3,7 +3,6 @@ from ImportFile import *
 torch.manual_seed(42)
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-
 def dump_to_file():
     torch.save(model, model_path + "/model.pkl")
     torch.save(model.state_dict(), model_path + "/model2.pkl")
@@ -39,60 +38,6 @@ def dump_to_file():
                    str(final_error_train) + "," +
                    str(error_vars) + "," +
                    str(error_pde))
-
-
-def initialize_inputs(len_sys_argv):
-    if len_sys_argv == 1:
-
-        # Random Seed for sampling the dataset
-        sampling_seed_ = 128
-
-        # Number of training+validation points
-        n_coll_ = 4000
-        n_u_ = 2
-        n_int_ = 0
-
-        # Additional Info
-        folder_path_ = "EigenLapl1dTest"
-        validation_size_ = 0.0  # useless
-        network_properties_ = {
-            "hidden_layers": 4,
-            "neurons": 20,
-            "residual_parameter": 1,
-            "kernel_regularizer": 1.0,
-            "normalization_parameter" : 100000,
-            "regularization_parameter": 0.0,
-            "batch_size": (n_coll_ + n_u_ + n_int_),
-            "epochs": 1,
-            "max_iter": 100000,
-            "activation": "snake",
-            "optimizer": "LBFGS"  # ADAM
-        }
-        retrain_ = 32
-
-        shuffle_ = False
-
-    else:
-        print(sys.argv)
-        # Random Seed for sampling the dataset
-        sampling_seed_ = int(sys.argv[1])
-
-        # Number of training+validation points
-        n_coll_ = int(sys.argv[2])
-        n_u_ = int(sys.argv[3])
-        n_int_ = int(sys.argv[4])
-
-        # Additional Info
-        folder_path_ = sys.argv[5]
-        validation_size_ = float(sys.argv[6])
-        network_properties_ = json.loads(sys.argv[7])
-        retrain_ = sys.argv[8]
-        if sys.argv[9] == "false":
-            shuffle_ = False
-        else:
-            shuffle_ = True
-
-    return sampling_seed_, n_coll_, n_u_, n_int_, folder_path_, validation_size_, network_properties_, retrain_, shuffle_
 
 
 sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = initialize_inputs(len(sys.argv))
@@ -197,7 +142,6 @@ model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimensio
 torch.manual_seed(retrain)
 init_xavier(model)
 
-
 # ####################################################################################
 # Model Training
 start = time.time()
@@ -241,7 +185,7 @@ if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
 L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
 Ec.plotting(model, images_path, extrema, None)
 
-eigenval = model.lam.detach().numpy()
+eigenval = model.lam.detach().numpy()[0]
 print("Eigenvalue : {}".format(eigenval))
 
 dump_to_file()

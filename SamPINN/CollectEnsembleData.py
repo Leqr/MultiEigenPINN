@@ -49,7 +49,7 @@ def select_over_retrainings(folder_path, selection="error_train", mode="min", co
 
 np.random.seed(42)
 
-base_path_list = ["SamPinn/Test"]
+base_path_list = ["TestPosEnc"]
 
 for base_path in base_path_list:
     print("#################################################")

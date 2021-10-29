@@ -135,10 +135,10 @@ class EquationClass(EquationBaseClass):
         test_out = model(test_inp)[:, 0].detach().numpy().reshape(-1, 1)
         assert (Exact.shape[1] == test_out.shape[1])
         L2_test = np.sqrt(np.mean((Exact - test_out) ** 2))
-        print("Error Test:", L2_test)
+        print("Error TestPosEnc:", L2_test)
 
         rel_L2_test = L2_test / np.sqrt(np.mean(Exact ** 2))
-        print("Relative Error Test:", rel_L2_test)
+        print("Relative Error TestPosEnc:", rel_L2_test)
 
         if images_path is not None:
             plt.figure()

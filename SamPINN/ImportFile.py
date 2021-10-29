@@ -55,6 +55,7 @@ from EquationModels.ForwardProblem.EigenLaplEq import EquationClass
 from FitClass import *
 from ModClass import *
 from DatasetClass import *
+from HelperSolve import *
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 #rc('text', usetex=True)

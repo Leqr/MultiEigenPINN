@@ -75,6 +75,10 @@ def fit(Ec, model, training_set_class, verbose=False):
                 x_u_train_ = x_u_train_.to(Ec.device)
                 u_train_ = u_train_.to(Ec.device)
 
+                #intialize orthonormalize
+                if model.other_networks is not None:
+                    model.evaluate_other_functions(x_coll_train_)
+
                 optimizer.step(closure=closure)
 
         elif len(training_boundary) == 0 and len(training_initial_internal) != 0:

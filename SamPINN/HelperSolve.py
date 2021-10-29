@@ -1,0 +1,74 @@
+import torch
+import sys
+import json
+import os
+
+def initialize_inputs(len_sys_argv):
+    if len_sys_argv == 1:
+
+        # Random Seed for sampling the dataset
+        sampling_seed_ = 128
+
+        # Number of training+validation points
+        n_coll_ = 2100
+        n_u_ = 2
+        n_int_ = 0
+
+        # Additional Info
+        folder_path_ = "EigenLapl1dTest"
+        validation_size_ = 0.0  # useless
+        network_properties_ = {
+            "hidden_layers": 4,
+            "neurons": 20,
+            "residual_parameter": 1,
+            "kernel_regularizer": 1.0,
+            "normalization_parameter" : 100000,
+            "regularization_parameter": 0.0,
+            "batch_size": (n_coll_ + n_u_ + n_int_),
+            "epochs": 1,
+            "max_iter": 100000,
+            "activation": "snake",
+            "optimizer": "LBFGS"  # ADAM
+        }
+        retrain_ = 32
+
+        shuffle_ = False
+
+    else:
+        print(sys.argv)
+        # Random Seed for sampling the dataset
+        sampling_seed_ = int(sys.argv[1])
+
+        # Number of training+validation points
+        n_coll_ = int(sys.argv[2])
+        n_u_ = int(sys.argv[3])
+        n_int_ = int(sys.argv[4])
+
+        # Additional Info
+        folder_path_ = sys.argv[5]
+        validation_size_ = float(sys.argv[6])
+        network_properties_ = json.loads(sys.argv[7])
+        retrain_ = sys.argv[8]
+        if sys.argv[9] == "false":
+            shuffle_ = False
+        else:
+            shuffle_ = True
+
+    return sampling_seed_, n_coll_, n_u_, n_int_, folder_path_, validation_size_, network_properties_, retrain_, shuffle_
+
+#for multi solve
+def load_previous_solutions(dir):
+    sols = dict()
+    print(dir)
+    for subdir, dirs, files in os.walk(dir):
+        for file in files:
+            print(file)
+            path_to_file = dir+"/"+file
+            eigen = os.path.splitext(file)[0]
+            extension = os.path.splitext(file)[1]
+            if extension == ".pkl":
+                sols[float(eigen)] = torch.load(path_to_file)
+    return sols
+
+def dump_to_file_eig(eigenvalue,model,path):
+    torch.save(model.state_dict(), path + "/" + str(eigenvalue) + ".pkl")
