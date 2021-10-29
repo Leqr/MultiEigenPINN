@@ -104,12 +104,15 @@ solved_path = os.getcwd() + "/Solved"
 
 for i in range(n_replicates):
     print("Computation Number : ",i)
+    sols = None
     if i != 0:
         #load the already computed orthogonal solutions
-        sols = load_previous_solutions(solved_path)
+        sols = load_previous_solutions(solved_path,input_dimension=input_dimensions, output_dimension=output_dimension,
+                  network_properties=network_properties)
 
     additional_models = None
-    model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension, network_properties=network_properties)
+    model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension,
+                  network_properties=network_properties,other_networks=sols)
 
     torch.manual_seed(retrain)
     init_xavier(model)
@@ -129,8 +132,6 @@ for i in range(n_replicates):
     print("Fitting Model")
     model.to(Ec.device)
     model.train()
-
-
 
     errors = fit(Ec, model, training_set_class, verbose=True)
     end = time.time() - start

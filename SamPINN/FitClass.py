@@ -75,10 +75,6 @@ def fit(Ec, model, training_set_class, verbose=False):
                 x_u_train_ = x_u_train_.to(Ec.device)
                 u_train_ = u_train_.to(Ec.device)
 
-                #intialize orthonormalize
-                if model.other_networks is not None:
-                    model.evaluate_other_functions(x_coll_train_)
-
                 optimizer.step(closure=closure)
 
         elif len(training_boundary) == 0 and len(training_initial_internal) != 0:
@@ -104,6 +100,10 @@ def fit(Ec, model, training_set_class, verbose=False):
                 u_b_train_ = u_b_train_.to(Ec.device)
                 x_u_train_ = x_u_train_.to(Ec.device)
                 u_train_ = u_train_.to(Ec.device)
+
+                # computes other_solutions prediction for eigenvalue problems
+                if model.other_networks is not None:
+                    model.evaluate_other_solutions(x_coll_train_)
 
                 optimizer.step(closure=closure)
 

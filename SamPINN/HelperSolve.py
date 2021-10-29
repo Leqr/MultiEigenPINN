@@ -2,6 +2,7 @@ import torch
 import sys
 import json
 import os
+from ModClass import Pinns
 
 def initialize_inputs(len_sys_argv):
     if len_sys_argv == 1:
@@ -57,17 +58,23 @@ def initialize_inputs(len_sys_argv):
     return sampling_seed_, n_coll_, n_u_, n_int_, folder_path_, validation_size_, network_properties_, retrain_, shuffle_
 
 #for multi solve
-def load_previous_solutions(dir):
+def load_previous_solutions(dir,input_dimension, output_dimension,
+                  network_properties):
+    """
+    Loads the previously computed solutions so that a loss with an orthogonality
+    term can be used and force the solution to another eigenvalue.
+    """
     sols = dict()
-    print(dir)
     for subdir, dirs, files in os.walk(dir):
         for file in files:
-            print(file)
             path_to_file = dir+"/"+file
             eigen = os.path.splitext(file)[0]
             extension = os.path.splitext(file)[1]
             if extension == ".pkl":
-                sols[float(eigen)] = torch.load(path_to_file)
+                model = Pinns(input_dimension=input_dimension, output_dimension=output_dimension,
+                  network_properties=network_properties)
+                model.load_state_dict(torch.load(path_to_file))
+                sols[float(eigen)] = model
     return sols
 
 def dump_to_file_eig(eigenvalue,model,path):

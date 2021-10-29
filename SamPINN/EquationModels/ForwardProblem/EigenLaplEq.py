@@ -56,14 +56,13 @@ class EquationClass(EquationBaseClass):
         #enforce function normalisation
         norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
 
-        #othogonal condition when doing a full_solve
+        #othogonal condition when trying to solve for multiple eigenvalues
         loss_orth = torch.tensor([0.0])
-        print(network.other_networks)
         if network.other_networks is not None:
-            lambda_orth = 100.0
-            for eig, func in network.other_networks.items():
+            lambda_orth = 1.0
+            for eig, func in network.other_solutions.items():
                 assert func.shape == u.shape
-                loss_orth += torch.dot(func,u)
+                loss_orth += torch.dot(u,func)
             loss_orth = lambda_orth*loss_orth
 
         residual = torch.cat([residual, norm_loss, loss_orth]).reshape(-1, )

@@ -127,10 +127,18 @@ class Pinns(nn.Module):
             x = self.activation(l(x))
         return self.output_layer(x)
 
-    def evaluate_other_functions(self,x_coll):
+    def evaluate_other_solutions(self,x_coll):
+        """
+        Use the attribute self.other_networks to create prediction with the
+        previously calculated solutions on the collocation points. Stores the
+        solutions in self.other_solutions as tensors in a dictionary with
+        the corresponding eigenvalue.
+        """
         self.other_solutions = dict()
         for eigen,sol in self.other_networks.items():
-            self.other_solutions[eigen] = sol(x_coll)
+            sol.eval()
+            with torch.no_grad():
+                self.other_solutions[eigen] = sol(x_coll).reshape(-1, )
 
 
 def init_xavier(model):
