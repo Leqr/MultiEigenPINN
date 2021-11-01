@@ -97,7 +97,7 @@ training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int
                                    batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)
 training_set_class.assemble_dataset()
 
-n_replicates = 10
+n_replicates = 20
 
 #path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
@@ -160,3 +160,8 @@ for i in range(n_replicates):
     print("Eigenvalue : {}".format(eigenval))
 
     dump_to_file_eig(eigenval, model, solved_path)
+
+#plot all the solutions on one figure for 1D problems
+if Ec.space_dimensions == 1:
+    x = np.linspace(Ec.extrema_values[0][0],Ec.extrema_values[0][1],1000)
+    multiPlot1D(x,input_dimensions,output_dimension,network_properties)

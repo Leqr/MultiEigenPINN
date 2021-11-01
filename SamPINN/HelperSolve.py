@@ -3,6 +3,7 @@ import sys
 import json
 import os
 from ModClass import Pinns
+import matplotlib.pyplot as plt
 
 def initialize_inputs(len_sys_argv):
     if len_sys_argv == 1:
@@ -11,7 +12,7 @@ def initialize_inputs(len_sys_argv):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 2100
+        n_coll_ = 4000
         n_u_ = 2
         n_int_ = 0
 
@@ -79,3 +80,31 @@ def load_previous_solutions(dir,input_dimension, output_dimension,
 
 def dump_to_file_eig(eigenvalue,model,path):
     torch.save(model.state_dict(), path + "/" + str(eigenvalue) + ".pkl")
+
+def multiPlot1D(x,input_dimension, output_dimension,network_properties):
+    """
+    Plots the output of the MultiSolve function by going through every models
+    in the Solved folder
+    """
+    path_to_solved = os.getcwd() + "/Solved"
+
+    plt.figure(figsize=(14, 10), dpi=120)
+
+    for subdir, dirs, files in os.walk(path_to_solved):
+        for file in files:
+            # go through every model
+            eigen = os.path.splitext(file)[0]
+            extension = os.path.splitext(file)[1]
+            path_to_file = path_to_solved + "/" + file
+            if extension == ".pkl":
+                model = Pinns(input_dimension=input_dimension, output_dimension=output_dimension,
+                              network_properties=network_properties)
+                model.load_state_dict(torch.load(path_to_file))
+                model.eval()
+                with torch.no_grad():
+                    x_t = torch.tensor(x,dtype = torch.float32).reshape(-1,1)
+                    pred = model(x_t)
+                    pred = pred.numpy()
+                    plt.plot(x,pred,label = "lam = " + str(eigen))
+            plt.legend()
+            plt.savefig("multiPlot1D.png")
