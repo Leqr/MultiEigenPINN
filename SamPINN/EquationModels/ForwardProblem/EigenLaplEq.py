@@ -59,7 +59,7 @@ class EquationClass(EquationBaseClass):
         #othogonal condition when trying to solve for multiple eigenvalues
         loss_orth = torch.tensor([0.0])
         if network.other_networks is not None:
-            lambda_orth = 1.0
+            lambda_orth = 10.0
             for eig, func in network.other_solutions.items():
                 assert func.shape == u.shape
                 loss_orth += torch.dot(u,func)

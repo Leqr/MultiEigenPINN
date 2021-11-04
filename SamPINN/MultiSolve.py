@@ -97,7 +97,7 @@ training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int
                                    batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)
 training_set_class.assemble_dataset()
 
-n_replicates = 20
+n_replicates = 30
 
 #path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"

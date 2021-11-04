@@ -3,8 +3,6 @@ from ImportFile import *
 torch.manual_seed(42)
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-torch.set_num_threads(6)
-
 def dump_to_file():
     torch.save(model, model_path + "/model.pkl")
     torch.save(model.state_dict(), model_path + "/model2.pkl")

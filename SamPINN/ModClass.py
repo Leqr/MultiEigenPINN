@@ -77,7 +77,7 @@ class Pinns(nn.Module):
         super(Pinns, self).__init__()
 
         #eigenvalue problems
-        max_eigenvalue = 10.0
+        max_eigenvalue = 15.0
         self.lam0 = max_eigenvalue*torch.rand(1)
         self.lam = nn.Parameter(self.lam0,requires_grad=True)
 
