@@ -1,2 +1,2 @@
 # EigenPINN
-Deep Learning for Differential Eigenvalue Problems
+Physics Informed Neural Netowrk for Differential Eigenvalue Problems
