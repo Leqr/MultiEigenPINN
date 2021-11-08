@@ -44,7 +44,7 @@ class EquationClass(EquationBaseClass):
 
         self.square_domain.apply_boundary_conditions(model, x_b_train, u_b_train, u_pred_var_list, u_train_var_list)
 
-    def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10):
+    def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10, lambda_orth = 100):
         x_f_train.requires_grad = True
         u = network(x_f_train)[:, 0].reshape(-1, )
 
@@ -59,10 +59,9 @@ class EquationClass(EquationBaseClass):
         #othogonal condition when trying to solve for multiple eigenvalues
         loss_orth = torch.tensor([0.0])
         if network.other_networks is not None:
-            lambda_orth = 10.0
             for eig, func in network.other_solutions.items():
                 assert func.shape == u.shape
-                loss_orth += torch.dot(u,func)
+                loss_orth += torch.mean(u*func)**2
             loss_orth = lambda_orth*loss_orth
 
         residual = torch.cat([residual, norm_loss, loss_orth]).reshape(-1, )
@@ -75,8 +74,11 @@ class EquationClass(EquationBaseClass):
 
         return residual
 
-    def exact(self, x):
-        return torch.sin(self.lam*x)
+    def exact(self, x, lam = None):
+        if lam is not None :
+            return torch.sin(lam*x)
+        else:
+            return torch.sin(self.lam*x)
 
     def ub0(self, t):
         type_BC = [DirichletBC()]
@@ -95,10 +97,10 @@ class EquationClass(EquationBaseClass):
         test_out = model(test_inp).detach().numpy().reshape(-1, 1)
         assert (Exact.shape[1] == test_out.shape[1])
         L2_test = np.sqrt(np.mean((Exact - test_out) ** 2))
-        print("Error TestPosEnc:", L2_test)
+        print("Error :", L2_test)
 
         rel_L2_test = L2_test / np.sqrt(np.mean(Exact ** 2))
-        print("Relative Error TestPosEnc:", rel_L2_test)
+        print("Relative Error :", rel_L2_test)
 
         if images_path is not None:
             plt.figure()

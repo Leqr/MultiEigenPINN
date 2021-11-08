@@ -12,7 +12,7 @@ def initialize_inputs(len_sys_argv):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 4000
+        n_coll_ = 2100
         n_u_ = 2
         n_int_ = 0
 
@@ -25,6 +25,7 @@ def initialize_inputs(len_sys_argv):
             "residual_parameter": 1,
             "kernel_regularizer": 1.0,
             "normalization_parameter" : 100000,
+            "othogonality_parameter" : 100,
             "regularization_parameter": 0.0,
             "batch_size": (n_coll_ + n_u_ + n_int_),
             "epochs": 1,
@@ -96,9 +97,11 @@ def multiPlot1D(x,input_dimension, output_dimension,network_properties):
     for subdir, dirs, files in os.walk(path_to_solved):
         for file in files:
             # go through every model
-            eigen = os.path.splitext(file)[0]
-            eigen_float = float(eigen)
-            extension = os.path.splitext(file)[1]
+            split = os.path.splitext(file)
+            eigen = split[0]
+            if split[1] != "" :
+                eigen_float = float(eigen)
+            extension = split[1]
             path_to_file = path_to_solved + "/" + file
             if extension == ".pkl":
                 if abs(eigen_float - round(eigen_float * 2) / 2) < precision:

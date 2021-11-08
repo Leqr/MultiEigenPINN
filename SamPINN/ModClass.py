@@ -97,7 +97,8 @@ class Pinns(nn.Module):
         #weight losses
         self.lambda_residual = float(network_properties["residual_parameter"])
         self.kernel_regularizer = int(network_properties["kernel_regularizer"])
-        self.lambda_norm = network_properties["normalization_parameter"]
+        self.lambda_norm = float(network_properties["normalization_parameter"])
+        self.lambda_orth = float(network_properties["othogonality_parameter"])
         self.regularization_param = float(network_properties["regularization_parameter"])
 
         #param
@@ -139,6 +140,22 @@ class Pinns(nn.Module):
             sol.eval()
             with torch.no_grad():
                 self.other_solutions[eigen] = sol(x_coll).reshape(-1, )
+
+    def evaluate_true_solutions(self,x_coll, equation_class) :
+        """
+            Use the known solutions of ∆u = lambda*u in [0,2*pi] with dirichlet
+            boundary condition to create the solutions that will be used in
+            the orthogonality condition.
+            This is done in an incremental manner.
+            The true eigenvalues are [1,1.5,2,2.5,...]
+        """
+        #need to map eigenvalue number to eigenvalue
+
+        self.other_solutions = dict()
+        for eigen, sol in self.other_networks.items():
+            eigen = round(float(eigen) * 2) / 2
+            self.other_solutions[eigen] = equation_class.exact(x_coll,eigen).reshape(-1,)
+
 
 
 def init_xavier(model):

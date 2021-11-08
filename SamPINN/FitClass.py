@@ -13,6 +13,7 @@ class CustomLoss(torch.nn.Module):
         lambda_residual = network.lambda_residual
         lambda_reg = network.regularization_param
         lambda_norm = network.lambda_norm
+        lambda_orth = network.lambda_orth
         order_regularizer = network.kernel_regularizer
 
         u_pred_var_list = list()
@@ -26,7 +27,7 @@ class CustomLoss(torch.nn.Module):
         u_pred_tot_vars = torch.cat(u_pred_var_list, 0).to(Ec.device)
         u_train_tot_vars = torch.cat(u_train_var_list, 0).to(Ec.device)
         assert not torch.isnan(u_pred_tot_vars).any()
-        res = Ec.compute_res(network, x_f_train, None, lambda_norm).to(Ec.device)
+        res = Ec.compute_res(network, x_f_train, None, lambda_norm, lambda_orth).to(Ec.device)
 
         loss_res = (torch.mean(abs(res) ** 2))
         loss_vars = (torch.mean(abs(u_pred_tot_vars - u_train_tot_vars) ** 2))
@@ -103,7 +104,8 @@ def fit(Ec, model, training_set_class, verbose=False):
 
                 # computes other_solutions prediction for eigenvalue problems
                 if model.other_networks is not None:
-                    model.evaluate_other_solutions(x_coll_train_)
+                    #model.evaluate_other_solutions(x_coll_train_)
+                    model.evaluate_true_solutions(x_coll_train_,Ec)
 
                 optimizer.step(closure=closure)
 

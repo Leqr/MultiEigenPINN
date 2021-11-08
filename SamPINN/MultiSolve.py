@@ -97,7 +97,7 @@ training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int
                                    batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)
 training_set_class.assemble_dataset()
 
-n_replicates = 30
+n_replicates = 20
 
 #path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
@@ -145,21 +145,23 @@ for i in range(n_replicates):
     print("Final Training Loss:", final_error_train)
     print("################################################")
 
-    images_path = folder_path + "/Images"
-    model_path = folder_path + "/TrainedModel"
+    #only keep solutions that have a low enough loss
+    if final_error_train < 0.6 :
 
-    if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
-        os.mkdir(folder_path)
-        os.mkdir(images_path)
-        os.mkdir(model_path)
+        images_path = folder_path + "/Images"
+        model_path = folder_path + "/TrainedModel"
 
-    L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
-    Ec.plotting(model, images_path, extrema, None)
+        if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
+            os.mkdir(folder_path)
+            os.mkdir(images_path)
+            os.mkdir(model_path)
 
-    eigenval = model.lam.detach().numpy()[0]
-    print("Eigenvalue : {}".format(eigenval))
+        L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
 
-    dump_to_file_eig(eigenval, model, solved_path)
+        eigenval = model.lam.detach().numpy()[0]
+        print("Eigenvalue : {}".format(eigenval))
+
+        dump_to_file_eig(eigenval, model, solved_path)
 
 #plot all the solutions on one figure for 1D problems
 if Ec.space_dimensions == 1:

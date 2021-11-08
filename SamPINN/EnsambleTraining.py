@@ -16,6 +16,7 @@ network_properties = {
     "residual_parameter": [1,10,100,1000,10000],
     "kernel_regularizer": [1.0],
     "normalization_parameter" : [10000,100000,1000000],
+    "othogonality_parameter": [10,100,1000],
     "regularization_parameter": [0.0],
     "batch_size": [(N_coll + N_u + N_int)],
     "epochs": [1],
@@ -44,12 +45,13 @@ for setup in settings:
         "residual_parameter": setup[2],
         "kernel_regularizer": setup[3],
         "normalization_parameter" : setup[4],
-        "regularization_parameter" : setup[5],
-        "batch_size": setup[6],
-        "epochs": setup[7],
-        "max_iter": setup[8],
-        "activation": setup[9],
-        "optimizer": setup[10]
+        "othogonality_parameter": setup[5],
+        "regularization_parameter" : setup[6],
+        "batch_size": setup[7],
+        "epochs": setup[8],
+        "max_iter": setup[9],
+        "activation": setup[10],
+        "optimizer": setup[11]
     }
 
     arguments = list()
