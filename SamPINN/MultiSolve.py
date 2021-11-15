@@ -1,5 +1,10 @@
 from ImportFile import *
 
+#manage the hyperparameter optimization mode
+HYPER_SOLVE = False
+if len(sys.argv) > 1:
+    HYPER_SOLVE = bool(sys.argv[1])
+
 #create folder that will store the eigenvalue and the solution network
 folder_path = "Solved"
 if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
