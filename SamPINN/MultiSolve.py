@@ -1,5 +1,8 @@
 from ImportFile import *
 
+if sys.platform == "linux":
+    from ray import tune
+
 #manage the hyperparameter optimization mode
 HYPER_SOLVE = False
 if len(sys.argv) > 1:

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from ImportFile import *
 
-def initialize_inputs(len_sys_argv):
+def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
     if len_sys_argv == 1:
 
         # Random Seed for sampling the dataset
@@ -21,21 +21,37 @@ def initialize_inputs(len_sys_argv):
         # Additional Info
         folder_path_ = "EigenLapl1dTest"
         validation_size_ = 0.0  # useless
-        network_properties_ = {
-            "hidden_layers": 4,
-            "neurons": 20,
-            "residual_parameter": 1,
-            "kernel_regularizer": 1.0,
-            "normalization_parameter" : 100000,
-            "othogonality_parameter" : 100,
-            "regularization_parameter": 0.0,
-            "batch_size": (n_coll_ + n_u_ + n_int_),
-            "epochs": 1,
-            "max_iter": 100000,
-            "activation": "snake",
-            "optimizer": "LBFGS"  # ADAM
-        }
-        retrain_ = 32
+        if not HYPER_SOLVE:
+            network_properties_ = {
+                "hidden_layers": 4,
+                "neurons": 20,
+                "residual_parameter": 1,
+                "kernel_regularizer": 1.0,
+                "normalization_parameter" : 100000,
+                "othogonality_parameter" : 100,
+                "regularization_parameter": 0.0,
+                "batch_size": (n_coll_ + n_u_ + n_int_),
+                "epochs": 1,
+                "max_iter": 100000,
+                "activation": "snake",
+                "optimizer": "LBFGS"  # ADAM
+            }
+        else : 
+            network_properties = {
+                "hidden_layers": [4],
+                "neurons": [20],
+                "residual_parameter": [1,10,100,1000,10000],
+                "kernel_regularizer": [1.0],
+                "normalization_parameter" : [10000,100000,1000000],
+                "othogonality_parameter": [10,100,1000],
+                "regularization_parameter": [0.0],
+                "batch_size": [(N_coll + N_u + N_int)],
+                "epochs": [1],
+                "max_iter": [100000],
+                "activation": ["snake"],
+                "optimizer": ["LBFGS"]
+            }
+    retrain_ = 32
 
         shuffle_ = False
 
