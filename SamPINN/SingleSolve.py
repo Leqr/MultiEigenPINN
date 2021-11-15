@@ -3,96 +3,13 @@ from ImportFile import *
 torch.manual_seed(42)
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-def dump_to_file():
-    torch.save(model, model_path + "/model.pkl")
-    torch.save(model.state_dict(), model_path + "/model2.pkl")
-    with open(model_path + os.sep + "Information.csv", "w") as w:
-        keys = list(network_properties.keys())
-        vals = list(network_properties.values())
-        w.write(keys[0])
-        for i in range(1, len(keys)):
-            w.write("," + keys[i])
-        w.write("\n")
-        w.write(str(vals[0]))
-        for i in range(1, len(vals)):
-            w.write("," + str(vals[i]))
+sampling_seed, N_coll, N_u, N_int, folder_path, validation_size\
+    , network_properties, retrain, shuffle = initialize_inputs(len(sys.argv))
 
-    with open(folder_path + '/InfoModel.txt', 'w') as file:
-        file.write("Nu_train,"
-                   "Nf_train,"
-                   "Nint_train,"
-                   "validation_size,"
-                   "train_time,"
-                   "L2_norm_test,"
-                   "rel_L2_norm,"
-                   "error_train,"
-                   "error_vars,"
-                   "error_pde\n")
-        file.write(str(N_u_train) + "," +
-                   str(N_coll_train) + "," +
-                   str(N_int_train) + "," +
-                   str(validation_size) + "," +
-                   str(end) + "," +
-                   str(L2_test) + "," +
-                   str(rel_L2_test) + "," +
-                   str(final_error_train) + "," +
-                   str(error_vars) + "," +
-                   str(error_pde))
-
-
-sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = initialize_inputs(len(sys.argv))
-
-Ec = EquationClass()
-if Ec.extrema_values is not None:
-    extrema = Ec.extrema_values
-    space_dimensions = Ec.space_dimensions
-    time_dimension = Ec.time_dimensions
-    parameter_dimensions = Ec.parameter_dimensions
-
-    print(space_dimensions, time_dimension, parameter_dimensions)
-else:
-    print("Using free shape. Make sure you have the functions:")
-    print("     - add_boundary(n_samples)")
-    print("     - add_collocation(n_samples)")
-    print("in the Equation file")
-
-    extrema = None
-    space_dimensions = Ec.space_dimensions
-    time_dimension = Ec.time_dimensions
-try:
-    parameters_values = Ec.parameters_values
-    parameter_dimensions = parameters_values.shape[0]
-except AttributeError:
-    print("No additional parameter found")
-    parameters_values = None
-    parameter_dimensions = 0
-
-input_dimensions = parameter_dimensions + time_dimension + space_dimensions
-output_dimension = Ec.output_dimension
-mode = "none"
-if network_properties["epochs"] != 1:
-    max_iter = 1
-else:
-    max_iter = network_properties["max_iter"]
-
-N_u_train = int(N_u * (1 - validation_size))
-N_coll_train = int(N_coll * (1 - validation_size))
-N_int_train = int(N_int * (1 - validation_size))
-N_train = N_u_train + N_coll_train + N_int_train
-
-if space_dimensions > 0:
-    N_b_train = int(N_u_train / (4 * space_dimensions))
-    # N_b_train = int(N_u_train / (1 + 2 * space_dimensions))
-else:
-    N_b_train = 0
-if time_dimension == 1:
-    N_i_train = N_u_train - 2 * space_dimensions * N_b_train
-    # N_i_train = N_u_train - N_b_train*(2 * space_dimensions)
-elif time_dimension == 0:
-    N_b_train = int(N_u_train / (2 * space_dimensions))
-    N_i_train = 0
-else:
-    raise ValueError()
+[Ec, max_iter, extrema, input_dimensions, output_dimension, space_dimensions, \
+                time_dimension, parameter_dimensions, N_u_train, N_coll_train, \
+                N_int_train, N_train, N_b_train, N_i_train] = \
+                setupEquationClass(N_coll, N_u, N_int,validation_size,network_properties)
 
 print("\n######################################")
 print("*******Domain Properties********")
@@ -119,23 +36,25 @@ print("\n######################################")
 
 if network_properties["optimizer"] == "LBFGS" and network_properties["epochs"] != 1 and \
         network_properties["max_iter"] == 1 and (batch_dim == "full" or batch_dim == N_train):
-    print(bcolors.WARNING + "WARNING: you set max_iter=1 and epochs=" + str(network_properties["epochs"]) + " with a LBFGS optimizer.\n"
-        "This will work but it is not efficient in full batch mode. Set max_iter = " + str(network_properties["epochs"]) +
-        " and epochs=1. instead" + bcolors.ENDC)
+    print(bcolors.WARNING + "WARNING: you set max_iter=1 and epochs=" + str(
+        network_properties["epochs"]) + " with a LBFGS optimizer.\n"
+                                        "This will work but it is not efficient in full batch mode. Set max_iter = " + str(
+        network_properties["epochs"]) +
+          " and epochs=1. instead" + bcolors.ENDC)
 
 if batch_dim == "full":
     batch_dim = N_train
 
 # ###################################################################################
 # Dataset Creation
-training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
-                                   batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)
-training_set_class.assemble_dataset()
+training_set_class = createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
+                                   batch_dim, sampling_seed, shuffle)
 
 # ####################################################################################
 # Model Creation
 additional_models = None
-model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension, network_properties=network_properties)
+model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension,
+              network_properties=network_properties)
 
 # ####################################################################################
 # Weights Initialization
@@ -177,7 +96,7 @@ print("################################################")
 images_path = folder_path + "/Images"
 model_path = folder_path + "/TrainedModel"
 
-if not(os.path.exists(folder_path) and os.path.isdir(folder_path)):
+if not (os.path.exists(folder_path) and os.path.isdir(folder_path)):
     os.mkdir(folder_path)
     os.mkdir(images_path)
     os.mkdir(model_path)
@@ -188,4 +107,6 @@ Ec.plotting(model, images_path, extrema, None)
 eigenval = model.lam.detach().numpy()[0]
 print("Eigenvalue : {}".format(eigenval))
 
-dump_to_file()
+data = [N_u_train, N_coll_train, N_int_train, validation_size, end, L2_test,
+        rel_L2_test, final_error_train, error_vars, error_pde]
+dump_to_file(model, model_path, folder_path, network_properties, data)

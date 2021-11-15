@@ -47,11 +47,13 @@ class DefineDataset:
             x_time_internal = torch.cat([x_time_internal, x_internal], 0)
             y_time_internal = torch.cat([y_time_internal, y_internal], 0)
 
+        """
         print("###################################")
         print(x_coll, x_coll.shape, y_coll.shape)
         print(x_time_internal, x_time_internal.shape, y_time_internal.shape)
         print(x_b, x_b.shape, y_b.shape)
         print("###################################")
+        """
 
         if self.n_collocation == 0:
             self.data_coll = DataLoader(torch.utils.data.TensorDataset(x_coll, y_coll), batch_size=1, shuffle=False)
