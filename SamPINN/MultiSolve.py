@@ -66,7 +66,7 @@ if batch_dim == "full":
 training_set_class = createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
                                    batch_dim, sampling_seed, shuffle)
 
-n_replicates = 1
+n_replicates = 10
 
 # path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
@@ -120,6 +120,7 @@ def training_function(config, params):
                     loss_vars= float(errors[1].detach().cpu().numpy()),
                     loss_pde = float(errors[2].detach().cpu().numpy()),
                     model = model)
+    else: return errors,model
 
 
 for i in range(n_replicates):
@@ -151,7 +152,7 @@ for i in range(n_replicates):
             best_trial.last_result["loss_pde"]))
         model = best_trial.last_result["model"]
     else:
-        model = training_function(config=network_properties,params=params_training_function)
+        [errors,model] = training_function(config=network_properties,params=params_training_function)
         final_error_train = float(((10 ** errors[0]) ** 0.5).detach().cpu().numpy())
         error_vars = float((errors[1]).detach().cpu().numpy())
         error_pde = float((errors[2]).detach().cpu().numpy())
