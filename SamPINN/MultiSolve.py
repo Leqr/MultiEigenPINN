@@ -4,7 +4,7 @@ from ray import tune
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = False
+HYPER_SOLVE = True
 
 # create folder that will store the eigenvalue and the solution network
 folder_path = "Solved"
