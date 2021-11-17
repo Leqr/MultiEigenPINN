@@ -18,6 +18,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         n_u_ = 2
         n_int_ = 0
 
+        network_properties_ = dict()
         # Additional Info
         folder_path_ = "EigenLapl1dTest"
         validation_size_ = 0.0  # useless
@@ -36,22 +37,23 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
                 "activation": "snake",
                 "optimizer": "LBFGS"  # ADAM
             }
-        else : 
-            network_properties = {
-                "hidden_layers": [4],
-                "neurons": [20],
-                "residual_parameter": [1,10,100,1000,10000],
-                "kernel_regularizer": [1.0],
-                "normalization_parameter" : [10000,100000,1000000],
-                "othogonality_parameter": [10,100,1000],
-                "regularization_parameter": [0.0],
-                "batch_size": [(N_coll + N_u + N_int)],
-                "epochs": [1],
-                "max_iter": [100000],
-                "activation": ["snake"],
-                "optimizer": ["LBFGS"]
+        else:
+            from ray import tune
+            network_properties_ = {
+                "hidden_layers": tune.grid_search([4]),
+                "neurons": tune.grid_search([20]),
+                "residual_parameter": tune.grid_search([1,10,100,1000,10000]),
+                "kernel_regularizer": tune.grid_search([1.0]),
+                "normalization_parameter" : tune.grid_search([10000,100000,1000000]),
+                "othogonality_parameter": tune.grid_search([10,100,1000]),
+                "regularization_parameter": tune.grid_search([0.0]),
+                "batch_size": tune.grid_search([(n_coll_ + n_u_ + n_int_)]),
+                "epochs": tune.grid_search([1]),
+                "max_iter": tune.grid_search([100000]),
+                "activation": tune.grid_search(["snake"]),
+                "optimizer": tune.grid_search(["LBFGS"])
             }
-    retrain_ = 32
+        retrain_ = 32
 
         shuffle_ = False
 
@@ -79,8 +81,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             network_properties_, retrain_, shuffle_
 
 #for multi solve
-def load_previous_solutions(dir,input_dimension, output_dimension,
-                  network_properties):
+def load_previous_solutions(dir,input_dimension, output_dimension,network_properties):
     """
     Loads the previously computed solutions so that a loss with an orthogonality
     term can be used and force the solution to another eigenvalue.

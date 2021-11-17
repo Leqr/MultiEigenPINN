@@ -44,7 +44,7 @@ class EquationClass(EquationBaseClass):
 
         self.square_domain.apply_boundary_conditions(model, x_b_train, u_b_train, u_pred_var_list, u_train_var_list)
 
-    def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10, lambda_orth = 100):
+    def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10, lambda_orth = 100, verbose = False):
         x_f_train.requires_grad = True
         u = network(x_f_train)[:, 0].reshape(-1, )
 
@@ -69,7 +69,7 @@ class EquationClass(EquationBaseClass):
 
         #show eigenvalue
         trained_lam = network.lam.detach().numpy()[0]
-        print("Eigenvalue = {}".format(trained_lam))
+        if verbose : print("Eigenvalue = {}".format(trained_lam))
         self.lam = trained_lam
 
         return residual
