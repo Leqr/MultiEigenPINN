@@ -106,6 +106,7 @@ Ec.plotting(model, images_path, extrema, None)
 
 eigenval = model.lam.detach().numpy()[0]
 print("Eigenvalue : {}".format(eigenval))
+print("{} iterations".format(model.iter))
 
 data = [N_u_train, N_coll_train, N_int_train, validation_size, end, L2_test,
         rel_L2_test, final_error_train, error_vars, error_pde]

@@ -76,6 +76,8 @@ class Pinns(nn.Module):
     def __init__(self, input_dimension, output_dimension, network_properties, other_networks = None):
         super(Pinns, self).__init__()
 
+        self.iter = 0
+
         #eigenvalue problems
         max_eigenvalue = 15.0
         self.lam0 = max_eigenvalue*torch.rand(1)

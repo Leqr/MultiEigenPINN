@@ -2,6 +2,10 @@ from ImportFile import *
 import itertools
 from ray import tune
 from functools import partial
+import ray
+
+#reduces the output of warnings
+ray.init(log_to_driver=False) #,local_mode=True) #sequential run param
 
 # manage the hyperparameter optimization mode
 HYPER_SOLVE = True
@@ -66,7 +70,7 @@ if batch_dim == "full":
 training_set_class = createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
                                    batch_dim, sampling_seed, shuffle)
 
-n_replicates = 10
+n_replicates = 2
 
 # path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
@@ -78,12 +82,11 @@ def training_function(config, params):
     :return: loss:
     """
     #get the parameters
-    i = params["i"]
     solved_path = params["solved_path"]
     input_dimensions= params["input_dimensions"]
     output_dimension= params["output_dimension"]
     retrain= params["retrain"]
-    max_iter= params["max_iter"]
+    max_iter= config["max_iter"]
     Ec= params["Equation"]
     training_set_class= params["training_set_class"]
     sols = None
@@ -114,12 +117,13 @@ def training_function(config, params):
     model.train()
 
 
-    errors = fit(Ec, model, training_set_class, verbose= not HYPER_SOLVE)
+    errors = fit(Ec, model, training_set_class, verbose = not HYPER_SOLVE)
     if HYPER_SOLVE:
         tune.report(loss_tot = float(errors[0].detach().cpu().numpy()),
                     loss_vars= float(errors[1].detach().cpu().numpy()),
                     loss_pde = float(errors[2].detach().cpu().numpy()),
-                    model = model)
+                    model = model,
+                    moditer = model.iter)
     else: return errors,model
 
 
@@ -133,16 +137,17 @@ for i in range(n_replicates):
         "input_dimensions": input_dimensions,
         "output_dimension": output_dimension,
         "retrain": retrain,
-        "max_iter": max_iter,
         "Equation": Ec,
         "training_set_class": training_set_class,
         "HYPER_SOLVE": HYPER_SOLVE
     }
+
     start = time.time()
     print("Fitting Model")
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
-                            config=network_properties,metric = 'loss_pde', mode = 'min')
+                            config=network_properties,metric = 'loss_pde', mode = 'min'
+                            , verbose = 2)
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
         final_error_train = ((10 ** best_trial.last_result["loss_tot"]) ** 0.5)
@@ -165,7 +170,7 @@ for i in range(n_replicates):
     model = model.eval()
 
     # only keep solutions that have a low enough loss
-    if final_error_train < 0.6:
+    if final_error_train < 0.8:
 
         images_path = folder_path + "/Images"
         model_path = folder_path + "/TrainedModel"

@@ -52,6 +52,7 @@ def fit(Ec, model, training_set_class, verbose=False):
     model.train()
 
     def closure():
+        model.iter = model.iter + 1
         #print(list(model.parameters()))
         optimizer.zero_grad()
         loss_f, loss_vars, loss_pde = CustomLoss().forward(Ec, model, x_u_train_, u_train_, x_b_train_, u_b_train_, x_coll_train_, training_set_class, verbose)
