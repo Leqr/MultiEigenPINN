@@ -14,7 +14,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 2100
+        n_coll_ = 2400
         n_u_ = 2
         n_int_ = 0
 
@@ -26,10 +26,10 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             network_properties_ = {
                 "hidden_layers": 4,
                 "neurons": 20,
-                "residual_parameter": 1,
+                "residual_parameter": 100,
                 "kernel_regularizer": 1.0,
-                "normalization_parameter" : 100000,
-                "othogonality_parameter" : 100,
+                "normalization_parameter" : 1000000,
+                "othogonality_parameter" : 1000,
                 "regularization_parameter": 0.0,
                 "batch_size": (n_coll_ + n_u_ + n_int_),
                 "epochs": 1,
