@@ -147,8 +147,9 @@ for i in range(n_replicates):
     print("Fitting Model")
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
-                            config=network_properties,metric = 'loss_pde', mode = 'min'
-                            , verbose = 2)
+                            config=network_properties,metric = 'loss_pde', mode = 'min',
+                            verbose = 2,
+                            raise_on_failed_trial = False)
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
         final_error_train = ((10 ** best_trial.last_result["loss_tot"]) ** 0.5)
