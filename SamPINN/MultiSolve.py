@@ -123,7 +123,8 @@ def training_function(config, params):
                     loss_vars= float(errors[1].detach().cpu().numpy()),
                     loss_pde = float(errors[2].detach().cpu().numpy()),
                     model = model,
-                    moditer = model.iter)
+                    moditer = model.iter,
+                    eigen = model.lam.detach().numpy()[0])
     else: return errors,model
 
 
