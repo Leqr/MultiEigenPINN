@@ -14,7 +14,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 128
 
         # Number of training+validation points
-        n_coll_ = 3000
+        n_coll_ = 4000
         n_u_ = 2
         n_int_ = 0
 
@@ -42,7 +42,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             network_properties_ = {
                 "hidden_layers": tune.grid_search([4]),
                 "neurons": tune.grid_search([20]),
-                "residual_parameter": tune.grid_search([1,10,100,1000,10000]),
+                "residual_parameter": tune.grid_search([1,100,10000]),
                 "kernel_regularizer": tune.grid_search([1.0]),
                 "normalization_parameter" : tune.grid_search([10000,100000,1000000]),
                 "othogonality_parameter": tune.grid_search([10,100,1000]),

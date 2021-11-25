@@ -70,7 +70,7 @@ if batch_dim == "full":
 training_set_class = createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
                                    batch_dim, sampling_seed, shuffle)
 
-n_replicates = 2
+n_replicates = 20
 
 # path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
@@ -148,7 +148,7 @@ for i in range(n_replicates):
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_pde', mode = 'min',
-                            verbose = 2,
+                            verbose = 1,
                             raise_on_failed_trial = False)
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
