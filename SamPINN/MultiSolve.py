@@ -101,6 +101,13 @@ def training_function(config, params):
     model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension,
                   network_properties=config, other_networks=sols)
     torch.manual_seed(retrain)
+
+    if HYPER_SOLVE:
+        #in this case the id_retrain parameter of config gives the number of
+        #retraining needed, the random seed is then reported to tune for reproducibility
+        retrain = random.randint(1, 10000)
+        torch.manual_seed(retrain)
+
     init_xavier(model)
 
     if config["optimizer"] == "LBFGS":
@@ -116,12 +123,6 @@ def training_function(config, params):
 
     model.to(Ec.device)
     model.train()
-
-    if HYPER_SOLVE:
-        #in this case the id_retrain parameter of config gives the number of
-        #retraining needed, the random seed is then reported to tune for reproducibility
-        retrain = random.randint(1, 10000)
-        torch.manual_seed(retrain)
 
     errors = fit(Ec, model, training_set_class, verbose = not HYPER_SOLVE)
     if HYPER_SOLVE:
