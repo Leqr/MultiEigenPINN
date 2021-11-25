@@ -79,7 +79,8 @@ def training_function(config, params):
     """
     Training function used by ray tune for the hyperparameter optimization
     :param config:
-    :return: loss:
+    :param params:
+    :return: errors:
     """
     #get the parameters
     solved_path = params["solved_path"]
@@ -116,6 +117,11 @@ def training_function(config, params):
     model.to(Ec.device)
     model.train()
 
+    if HYPER_SOLVE:
+        #in this case the id_retrain parameter of config gives the number of
+        #retraining needed, the random seed is then reported to tune for reproducibility
+        retrain = random.randint(1, 10000)
+        torch.manual_seed(retrain)
 
     errors = fit(Ec, model, training_set_class, verbose = not HYPER_SOLVE)
     if HYPER_SOLVE:
@@ -124,7 +130,8 @@ def training_function(config, params):
                     loss_pde = float(errors[2].detach().cpu().numpy()),
                     model = model,
                     moditer = model.iter,
-                    eigen = model.lam.detach().numpy()[0])
+                    eigen = model.lam.detach().numpy()[0],
+                    torch_seed = retrain)
     else: return errors,model
 
 

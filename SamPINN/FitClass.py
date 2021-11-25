@@ -105,8 +105,9 @@ def fit(Ec, model, training_set_class, verbose=False):
 
                 # computes other_solutions prediction for eigenvalue problems
                 if model.other_networks is not None:
-                    #model.evaluate_other_solutions(x_coll_train_)
-                    model.evaluate_true_solutions(x_coll_train_,Ec)
+                    model.evaluate_other_solutions(x_coll_train_)
+                    #evaluate with the exact solution for orthogonality
+                    #model.evaluate_true_solutions(x_coll_train_,Ec)
 
                 optimizer.step(closure=closure)
 

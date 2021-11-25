@@ -51,7 +51,8 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
                 "epochs": tune.grid_search([1]),
                 "max_iter": tune.grid_search([100000]),
                 "activation": tune.grid_search(["snake"]),
-                "optimizer": tune.grid_search(["LBFGS"])
+                "optimizer": tune.grid_search(["LBFGS"]),
+                "id_retrain": tune.grid_search([1,2])
             }
         retrain_ = 32
 
