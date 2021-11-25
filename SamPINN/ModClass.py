@@ -165,6 +165,7 @@ def init_xavier(model):
         if type(m) == nn.Linear and m.weight.requires_grad and m.bias.requires_grad:
             # gain = nn.init.calculate_gain('tanh')
             gain = 1
+            # torch.randn(m.weight.shape)
             torch.nn.init.xavier_uniform_(m.weight, gain=gain)
             torch.nn.init.uniform_(m.bias, 0, 1)
 

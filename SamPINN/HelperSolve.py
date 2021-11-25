@@ -28,8 +28,8 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
                 "neurons": 20,
                 "residual_parameter": 1,
                 "kernel_regularizer": 1.0,
-                "normalization_parameter" : 100000,
-                "othogonality_parameter" : 100,
+                "normalization_parameter": 1000000,
+                "othogonality_parameter": 100,
                 "regularization_parameter": 0.0,
                 "batch_size": (n_coll_ + n_u_ + n_int_),
                 "epochs": 1,
@@ -55,6 +55,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             }
         retrain_ = 32
 
+        # = true with batches
         shuffle_ = False
 
     else:
