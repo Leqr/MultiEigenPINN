@@ -136,6 +136,7 @@ class Pinns(nn.Module):
         previously calculated solutions on the collocation points. Stores the
         solutions in self.other_solutions as tensors in a dictionary with
         the corresponding eigenvalue.
+        :param x_coll:
         """
         self.other_solutions = dict()
         for eigen,sol in self.other_networks.items():
@@ -145,11 +146,13 @@ class Pinns(nn.Module):
 
     def evaluate_true_solutions(self,x_coll, equation_class) :
         """
-            Use the known solutions of ∆u = lambda*u in [0,2*pi] with dirichlet
-            boundary condition to create the solutions that will be used in
-            the orthogonality condition.
-            This is done in an incremental manner.
-            The true eigenvalues are [1,1.5,2,2.5,...]
+        Use the known solutions of ∆u = lambda*u in [0,2*pi] with dirichlet
+        boundary condition to create the solutions that will be used in
+        the orthogonality condition.
+        This is done in an incremental manner.
+        The true eigenvalues are [1,1.5,2,2.5,...]
+        :param x_coll:
+        :param equation_class:
         """
         #need to map eigenvalue number to eigenvalue
 

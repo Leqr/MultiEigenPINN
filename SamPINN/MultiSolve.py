@@ -8,7 +8,7 @@ import ray
 ray.init(log_to_driver=False) #,local_mode=True) #sequential run param
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = True
+HYPER_SOLVE = False
 
 # create folder that will store the eigenvalue and the solution network
 folder_path = "Solved"
@@ -80,7 +80,7 @@ def training_function(config, params):
     Training function used by ray tune for the hyperparameter optimization
     :param config:
     :param params:
-    :return: errors:
+    :return errors:
     """
     #get the parameters
     solved_path = params["solved_path"]

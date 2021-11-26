@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 from ImportFile import *
 
 def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
+    """
+    Initialize the computation parameters.
+    :param len_sys_argv:
+    :param HYPER_SOLVE:
+    :return sampling_seed_, n_coll_, n_u_, n_int_, folder_path_, validation_size_,
+        network_properties_, retrain_, shuffle_:
+    """
     if len_sys_argv == 1:
 
         # Random Seed for sampling the dataset
@@ -22,13 +29,16 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         # Additional Info
         folder_path_ = "EigenLapl1dTest"
         validation_size_ = 0.0  # useless
+
+        #takes into account both hyperparam optimization with ray tune and single function
+        #solve
         if not HYPER_SOLVE:
             network_properties_ = {
                 "hidden_layers": 4,
                 "neurons": 20,
-                "residual_parameter": 1,
+                "residual_parameter": 100,
                 "kernel_regularizer": 1.0,
-                "normalization_parameter": 1000000,
+                "normalization_parameter": 10000,
                 "othogonality_parameter": 100,
                 "regularization_parameter": 0.0,
                 "batch_size": (n_coll_ + n_u_ + n_int_),
@@ -54,6 +64,8 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
                 "optimizer": tune.grid_search(["LBFGS"]),
                 "id_retrain": tune.grid_search([1,2])
             }
+
+        #pytorch seed
         retrain_ = 32
 
         # = true with batches
@@ -87,6 +99,11 @@ def load_previous_solutions(dir,input_dimension, output_dimension,network_proper
     """
     Loads the previously computed solutions so that a loss with an orthogonality
     term can be used and force the solution to another eigenvalue.
+    :param dir:
+    :param input_dimension:
+    :param output_dimension:
+    :param network_properties:
+    :return solutions neural nets dictionary with eigenvalue keys:
     """
     sols = dict()
     for subdir, dirs, files in os.walk(dir):
@@ -102,6 +119,14 @@ def load_previous_solutions(dir,input_dimension, output_dimension,network_proper
     return sols
 
 def dump_to_file(model, model_path, folder_path, network_properties, data):
+    """
+    Output the training results in a folder.
+    :param model:
+    :param model_path:
+    :param folder_path:
+    :param network_properties:
+    :param data:
+    """
     torch.save(model, model_path + "/model.pkl")
     torch.save(model.state_dict(), model_path + "/model2.pkl")
     with open(model_path + os.sep + "Information.csv", "w") as w:
@@ -140,12 +165,23 @@ def dump_to_file(model, model_path, folder_path, network_properties, data):
                    str(error_pde))
 
 def dump_to_file_eig(eigenvalue,model,path):
+    """
+    Saves the trained model corresponding to one eigenvalue in a folder as .pkl.
+    The name of the file is the found eigenvalue.
+    :param eigenvalue:
+    :param model:
+    :param path:
+    """
     torch.save(model.state_dict(), path + "/" + str(eigenvalue) + ".pkl")
 
 def multiPlot1D(x,input_dimension, output_dimension,network_properties):
     """
     Plots the output of the MultiSolve function by going through every models
-    in the Solved folder
+    in the Solved folder.
+    :param x:
+    :param input_dimension:
+    :param output_dimension:
+    :param network_properties:
     """
     path_to_solved = os.getcwd() + "/Solved"
 
@@ -179,7 +215,15 @@ def multiPlot1D(x,input_dimension, output_dimension,network_properties):
 
 def setupEquationClass(N_coll, N_u, N_int,validation_size,network_properties):
     """
-        Manages the equation type, dimensions and points generation.
+    Manages the equation type, dimensions and points generation.
+    :param N_coll:
+    :param N_u:
+    :param N_int:
+    :param validation_size:
+    :param network_properties:
+    :return Ec, max_iter, extrema, input_dimensions, output_dimension, space_dimensions,
+                time_dimension, parameter_dimensions, N_u_train, N_coll_train,
+                N_int_train, N_train, N_b_train, N_i_train:
     """
     Ec = EquationClass()
     if Ec.extrema_values is not None:
@@ -239,6 +283,18 @@ def setupEquationClass(N_coll, N_u, N_int,validation_size,network_properties):
 
 def createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train, batch_dim,
                   sampling_seed, shuffle):
+    """
+    Creates the PyTorch compatible dataset.
+    :param Ec:
+    :param N_coll_train:
+    :param N_b_train:
+    :param N_i_train:
+    :param N_int_train:
+    :param batch_dim:
+    :param sampling_seed:
+    :param shuffle:
+    :return training_set_class:
+    """
 
     training_set_class = DefineDataset(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
                             batches=batch_dim, random_seed=sampling_seed, shuffle=shuffle)

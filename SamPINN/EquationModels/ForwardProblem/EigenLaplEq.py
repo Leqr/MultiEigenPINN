@@ -7,6 +7,10 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 
 class EquationClass(EquationBaseClass):
+    """
+    ∆u = lambda*u
+    u(0) = u(2*pi) = 0.0
+    """
 
     def __init__(self):
         EquationBaseClass.__init__(self)
@@ -45,6 +49,18 @@ class EquationClass(EquationBaseClass):
         self.square_domain.apply_boundary_conditions(model, x_b_train, u_b_train, u_pred_var_list, u_train_var_list)
 
     def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10, lambda_orth = 100, verbose = False):
+        """
+        Computes the PDE residual. It is constituted of the pde loss ∆u + u*lambda^2,
+        the normalization loss |||u||^2 - 0.5| and the orthogonal condition when some
+        eigensolutions were already found sum over the previous solutions of <u,u_prev>.
+        :param network:
+        :param x_f_train:
+        :param solid_object:
+        :param lambda_norm: hyperparameter for the normalization loss value
+        :param lambda_orth: hyperparameter for the orthogonal loss value
+        :param verbose:
+        :return pde residual:
+        """
         x_f_train.requires_grad = True
         u = network(x_f_train)[:, 0].reshape(-1, )
 
@@ -75,6 +91,13 @@ class EquationClass(EquationBaseClass):
         return residual
 
     def exact(self, x, lam = None):
+        """
+        Exact solution of the pde. Takes care of the case where the eigenvalue is given
+        and where the eigenvalue is learned.
+        :param x: domain value to evaluate the function
+        :param lam: eigenvalue
+        :return exact solution:
+        """
         if lam is not None :
             return torch.sin(lam*x)
         else:
@@ -91,6 +114,13 @@ class EquationClass(EquationBaseClass):
         return u, type_BC
 
     def compute_generalization_error(self, model, extrema, images_path=None):
+        """
+        Compute the generalization error given the exact solution of the problem.
+        :param model:
+        :param extrema:
+        :param images_path:
+        :return L2_test, rel_L2_test: L2 and relative L2 test errors.
+        """
         model.eval()
         test_inp = self.convert(torch.rand([100000, extrema.shape[0]]), extrema)
         Exact = (self.exact(test_inp)).numpy().reshape(-1, 1)
@@ -112,6 +142,13 @@ class EquationClass(EquationBaseClass):
         return L2_test, rel_L2_test
 
     def plotting(self, model, images_path, extrema, solid):
+        """
+        Plots the numerical and exact solutions of the pde.
+        :param model:
+        :param images_path:
+        :param extrema:
+        :param solid:
+        """
         model.cpu()
         model = model.eval()
         x = torch.linspace(extrema[0, 0], extrema[0, 1], 500).reshape(-1,1)
