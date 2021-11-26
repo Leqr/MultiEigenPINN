@@ -1,14 +1,18 @@
 from ImportFile import *
 import itertools
-from ray import tune
 from functools import partial
-import ray
-
-#reduces the output of warnings
-ray.init(log_to_driver=False) #,local_mode=True) #sequential run param
 
 # manage the hyperparameter optimization mode
 HYPER_SOLVE = False
+
+# uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
+TRANSFER_LEARNING = True
+
+if HYPER_SOLVE:
+    from ray import tune
+    import ray
+    #reduces the output of warnings
+    ray.init(log_to_driver=False) #,local_mode=True) #sequential run param
 
 # create folder that will store the eigenvalue and the solution network
 folder_path = "Solved"
@@ -70,7 +74,7 @@ if batch_dim == "full":
 training_set_class = createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
                                    batch_dim, sampling_seed, shuffle)
 
-n_replicates = 20
+n_replicates = 5
 
 # path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
@@ -155,8 +159,8 @@ for i in range(n_replicates):
     print("Fitting Model")
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
-                            config=network_properties,metric = 'loss_pde', mode = 'min',
-                            verbose = 1,
+                            config=network_properties,metric = 'loss_tot', mode = 'min',
+                            verbose = 3,
                             raise_on_failed_trial = False)
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
