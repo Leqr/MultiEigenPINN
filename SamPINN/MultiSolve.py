@@ -1,3 +1,5 @@
+import torch
+
 from ImportFile import *
 import itertools
 from functools import partial
@@ -74,8 +76,6 @@ if batch_dim == "full":
 training_set_class = createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train,
                                    batch_dim, sampling_seed, shuffle)
 
-n_replicates = 5
-
 # path where the new solutions will be added
 solved_path = os.getcwd() + "/Solved"
 
@@ -90,21 +90,18 @@ def training_function(config, params):
     solved_path = params["solved_path"]
     input_dimensions= params["input_dimensions"]
     output_dimension= params["output_dimension"]
-    retrain= params["retrain"]
     max_iter= config["max_iter"]
     Ec= params["Equation"]
     training_set_class= params["training_set_class"]
     sols = None
     i = params["i"]
     HYPER_SOLVE = params["HYPER_SOLVE"]
+    TRANSFER_LEARNING = params["TRANSFER_LEARNING"]
     if i != 0:
         # load the already computed orthogonal solutions
         sols = load_previous_solutions(solved_path, input_dimension=input_dimensions,
                                        output_dimension=output_dimension,
                                        network_properties=config)
-    model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension,
-                  network_properties=config, other_networks=sols)
-    torch.manual_seed(retrain)
 
     if HYPER_SOLVE:
         #in this case the id_retrain parameter of config gives the number of
@@ -112,7 +109,32 @@ def training_function(config, params):
         retrain = random.randint(1, 10000)
         torch.manual_seed(retrain)
 
-    init_xavier(model)
+    model = None
+    # deal with the model initilisation given that we are doing transfer learning or not
+    if TRANSFER_LEARNING:
+        if i != 0:
+            # randomly take one of the already found solution as starting network
+            eigenvalue, model = random.choice(list(sols.items()))
+
+            # reset the model
+            model.reset()
+
+            # assign the previously found solutions
+            model.other_networks = sols
+
+            #add noise to the neural net weights to help get out of the previous local minima
+            model.noise()
+
+    if not TRANSFER_LEARNING or (TRANSFER_LEARNING and i == 0):
+        model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension,
+                      network_properties=config, other_networks=sols)
+        init_xavier(model)
+
+    """
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            print(name, param.data)
+    """
 
     if config["optimizer"] == "LBFGS":
         optimizer_LBFGS = optim.LBFGS(model.parameters(), lr=0.8, max_iter=max_iter, max_eval=50000, history_size=100,
@@ -139,6 +161,9 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
+n_replicates = 10
+
+torch.manual_seed(retrain)
 
 for i in range(n_replicates):
     print("Computation Number : ", i)
@@ -149,10 +174,10 @@ for i in range(n_replicates):
         "solved_path": solved_path,
         "input_dimensions": input_dimensions,
         "output_dimension": output_dimension,
-        "retrain": retrain,
         "Equation": Ec,
         "training_set_class": training_set_class,
-        "HYPER_SOLVE": HYPER_SOLVE
+        "HYPER_SOLVE": HYPER_SOLVE,
+        "TRANSFER_LEARNING": TRANSFER_LEARNING
     }
 
     start = time.time()
