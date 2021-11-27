@@ -85,7 +85,7 @@ class EquationClass(EquationBaseClass):
 
         #show eigenvalue
         trained_lam = network.lam.detach().numpy()[0]
-        if verbose : print("Eigenvalue = {}".format(trained_lam))
+        if verbose and (network.iter % 10 == 0): print("Eigenvalue = {}".format(trained_lam))
         self.lam = trained_lam
 
         return residual

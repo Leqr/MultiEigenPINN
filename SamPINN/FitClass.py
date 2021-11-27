@@ -34,7 +34,7 @@ class CustomLoss(torch.nn.Module):
         loss_reg = regularization(network, order_regularizer)
 
         loss_v = torch.log10(loss_vars + lambda_residual * loss_res + lambda_reg * loss_reg)
-        if verbose : print("Total Loss:", loss_v.detach().cpu().numpy().round(4), "| Function Loss:", torch.log10(loss_vars).detach().cpu().numpy().round(4), "| PDE Loss:", torch.log10(loss_res).detach().cpu().numpy().round(4), "\n")
+        if verbose and (network.iter % 10 == 0) : print("Total Loss:", loss_v.detach().cpu().numpy().round(4), "| Function Loss:", torch.log10(loss_vars).detach().cpu().numpy().round(4), "| PDE Loss:", torch.log10(loss_res).detach().cpu().numpy().round(4), "\n")
 
         return loss_v, loss_vars, loss_res
 

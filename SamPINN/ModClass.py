@@ -1,3 +1,5 @@
+import torch
+
 from ImportFile import *
 
 
@@ -79,8 +81,8 @@ class Pinns(nn.Module):
         self.iter = 0
 
         #eigenvalue problems
-        max_eigenvalue = 15.0
-        self.lam0 = max_eigenvalue*torch.rand(1)
+        self.max_eigenvalue = 15.0
+        self.lam0 = self.max_eigenvalue*torch.rand(1)
         self.lam = nn.Parameter(self.lam0,requires_grad=True)
 
         # positional encoding
@@ -161,6 +163,28 @@ class Pinns(nn.Module):
             eigen = round(float(eigen) * 2) / 2
             self.other_solutions[eigen] = equation_class.exact(x_coll,eigen).reshape(-1,)
 
+    def reset(self):
+        """
+        Resets the PINN by just keeping the neural net weights. Useful for transfer learning.
+        """
+        self.iter = 0
+
+        # eigenvalue problems
+        self.lam0 = self.max_eigenvalue * torch.rand(1)
+        self.lam = nn.Parameter(self.lam0, requires_grad=True)
+
+    def noise(self,sigma = 0.005):
+        """
+        Adds normal distributed noise with sd sigma to the weigths of the network
+        """
+        def noise_weights(m):
+            if type(m) == nn.Linear and m.weight.requires_grad and m.bias.requires_grad:
+                noise = torch.normal(torch.zeros(len(m.weight)),torch.tensor(sigma)).reshape(-1,1)
+
+                #add noise directly to the data tensor to circumvent leaf tensor assignment issues
+                m.weight.data = m.weight.data + noise
+
+        self.apply(noise_weights)
 
 
 def init_xavier(model):
@@ -176,4 +200,6 @@ def init_xavier(model):
             # m.bias.data.fill_(0)
 
     model.apply(init_weights)
+
+
 
