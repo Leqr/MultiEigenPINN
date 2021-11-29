@@ -5,7 +5,7 @@ import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = False
+HYPER_SOLVE = True
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -161,7 +161,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 10
+n_replicates = 30
 
 torch.manual_seed(retrain)
 
