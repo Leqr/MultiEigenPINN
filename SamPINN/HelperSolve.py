@@ -174,6 +174,11 @@ def dump_to_file_eig(eigenvalue,model,path):
     """
     torch.save(model.state_dict(), path + "/" + str(eigenvalue) + ".pkl")
 
+def remove_from_file_eig(eigenvalue,path):
+    file = path + "/" + str(eigenvalue) + ".pkl"
+    os.remove(file)
+
+
 def multiPlot1D(x,input_dimension, output_dimension,network_properties):
     """
     Plots the output of the MultiSolve function by going through every models
@@ -301,4 +306,9 @@ def createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train, batch_dim
     training_set_class.assemble_dataset()
 
     return training_set_class
+
+def printRecap(errors_model):
+    from tabulate import tabulate
+    table = [[key,value[1],value[2],value[3]] for key,value in errors_model.items()]
+    print(tabulate(table, headers=["Eigenvalue","Total Error", "Boundary Error","PDE + Norm + Orth Error"]))
 

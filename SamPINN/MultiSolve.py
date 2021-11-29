@@ -97,7 +97,9 @@ def training_function(config, params):
     i = params["i"]
     HYPER_SOLVE = params["HYPER_SOLVE"]
     TRANSFER_LEARNING = params["TRANSFER_LEARNING"]
-    if i != 0:
+    errors_model = params["errors_model"]
+
+    if len(errors_model) != 0:
         # load the already computed orthogonal solutions
         sols = load_previous_solutions(solved_path, input_dimension=input_dimensions,
                                        output_dimension=output_dimension,
@@ -112,7 +114,7 @@ def training_function(config, params):
     model = None
     # deal with the model initilisation given that we are doing transfer learning or not
     if TRANSFER_LEARNING:
-        if i != 0:
+        if len(errors_model) != 0:
             # randomly take one of the already found solution as starting network
             eigenvalue, model = random.choice(list(sols.items()))
 
@@ -161,9 +163,13 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 30
+n_replicates = 5
 
 torch.manual_seed(retrain)
+
+# keep in memory the erros of the models so that we can discard regarding to
+# the error of the model for the same eigenvalue
+errors_model = dict()
 
 for i in range(n_replicates):
     print("Computation Number : ", i)
@@ -177,7 +183,8 @@ for i in range(n_replicates):
         "Equation": Ec,
         "training_set_class": training_set_class,
         "HYPER_SOLVE": HYPER_SOLVE,
-        "TRANSFER_LEARNING": TRANSFER_LEARNING
+        "TRANSFER_LEARNING": TRANSFER_LEARNING,
+        "errors_model": errors_model
     }
 
     start = time.time()
@@ -189,7 +196,11 @@ for i in range(n_replicates):
                             raise_on_failed_trial = False)
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
+
         final_error_train = ((10 ** best_trial.last_result["loss_tot"]) ** 0.5)
+        error_vars = float(best_trial.last_result["loss_vars"])
+        error_pde = float(best_trial.last_result["loss_pde"])
+
         print("Best trial final total loss: {}".format(
             final_error_train))
         print("Best trial final pde loss: {}".format(
@@ -224,9 +235,26 @@ for i in range(n_replicates):
         eigenval = model.lam.detach().numpy()[0]
         print("Eigenvalue : {}".format(eigenval))
 
-        dump_to_file_eig(eigenval, model, solved_path)
+        errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
+
+        #iterate through the previously computed solutions to check if we already found
+        #this eigenvalue
+        match = False
+        for key,value in errors_model.items():
+            if np.isclose(key,eigenval, 0.04):
+                if errors_model[key][1] > errors_model[eigenval][1]:
+                    #keep the best solution
+                    remove_from_file_eig(key,solved_path)
+                    dump_to_file_eig(eigenval, model, solved_path)
+                    match = True
+        if not match:
+            dump_to_file_eig(eigenval, model, solved_path)
+
 
 # plot all the solutions on one figure for 1D problems
 if Ec.space_dimensions == 1 and not HYPER_SOLVE:
     x = np.linspace(Ec.extrema_values[0][0], Ec.extrema_values[0][1], 1000)
     multiPlot1D(x, input_dimensions, output_dimension, network_properties)
+
+if True :
+    printRecap(errors_model)
