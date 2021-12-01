@@ -163,7 +163,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 5
+n_replicates = 10
 
 torch.manual_seed(retrain)
 
@@ -239,16 +239,14 @@ for i in range(n_replicates):
 
         #iterate through the previously computed solutions to check if we already found
         #this eigenvalue
-        match = False
         for key,value in errors_model.items():
             if np.isclose(key,eigenval, 0.04):
                 if errors_model[key][1] > errors_model[eigenval][1]:
                     #keep the best solution
                     remove_from_file_eig(key,solved_path)
                     dump_to_file_eig(eigenval, model, solved_path)
-                    match = True
-        if not match:
-            dump_to_file_eig(eigenval, model, solved_path)
+            else : 
+                dump_to_file_eig(eigenval, model, solved_path)  
 
 
 # plot all the solutions on one figure for 1D problems
