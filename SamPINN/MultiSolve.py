@@ -19,6 +19,10 @@ if HYPER_SOLVE:
 # create folder that will store the eigenvalue and the solution network
 folder_path = "Solved"
 if not (os.path.exists(folder_path) and os.path.isdir(folder_path)):
+        #careful as this clears the previously found solutions
+        os.mkdir(folder_path)
+else :
+    os.system("rm -r Solved")
     os.mkdir(folder_path)
 
 sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = \
@@ -26,6 +30,9 @@ sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_propert
 
 # unfold the network properties into single setup
 if HYPER_SOLVE:
+    from ray.tune import CLIReporter
+    reporter = CLIReporter(max_progress_rows=10,print_intermediate_tables = False,
+                           metric=None,mode=None,max_report_frequency=5)
     settings = list(itertools.product(*network_properties.values()))
 
 [Ec, max_iter, extrema, input_dimensions, output_dimension, space_dimensions, \
@@ -163,7 +170,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 10
+n_replicates = 30
 
 torch.manual_seed(retrain)
 
@@ -192,8 +199,9 @@ for i in range(n_replicates):
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_tot', mode = 'min',
-                            verbose = 3,
-                            raise_on_failed_trial = False)
+                            verbose=1,
+                            raise_on_failed_trial = False
+                            )
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
 
@@ -239,14 +247,20 @@ for i in range(n_replicates):
 
         #iterate through the previously computed solutions to check if we already found
         #this eigenvalue
+        match = False
         for key,value in errors_model.items():
-            if np.isclose(key,eigenval, 0.04):
+            if np.isclose(key,eigenval, 0.1):
                 if errors_model[key][1] > errors_model[eigenval][1]:
                     #keep the best solution
                     remove_from_file_eig(key,solved_path)
                     dump_to_file_eig(eigenval, model, solved_path)
-            else : 
-                dump_to_file_eig(eigenval, model, solved_path)  
+                if eigenval == key:
+                    dump_to_file_eig(eigenval, model, solved_path)
+
+                match = True
+
+        if not match:
+            dump_to_file_eig(eigenval, model, solved_path)
 
 
 # plot all the solutions on one figure for 1D problems
