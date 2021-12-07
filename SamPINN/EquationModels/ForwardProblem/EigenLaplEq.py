@@ -8,7 +8,7 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
     """
-    ∆u = lambda*u
+    ∆u + lambda^2*u = 0
     u(0) = u(2*pi) = 0.0
     """
 
