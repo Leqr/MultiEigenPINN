@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ "$1" = "single" ]; then
     echo "Single core job"
-    bsub -oo "eigensolvesingle.out" -n 48 -W 04:00  -R "span[ptile=48]" -M 8G "python MultiSolve.py"
+    bsub -oo "eigensolvesingle.out" -n 48 -W 08:00  -R "span[ptile=48]" -M 8G "python MultiSolve.py"
 fi
 
 if [ "$1" = "multi" ]; then
