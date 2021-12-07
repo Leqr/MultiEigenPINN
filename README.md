@@ -1,2 +1,2 @@
 # EigenPINN
-Physics Informed Neural Netowrk for Differential Eigenvalue Problems
+Physics Informed Neural Network for Differential Eigenvalue Problems
