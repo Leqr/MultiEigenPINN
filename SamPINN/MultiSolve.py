@@ -199,7 +199,7 @@ for i in range(n_replicates):
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_tot', mode = 'min',
-                            verbose=1,
+                            verbose=2,
                             raise_on_failed_trial = False
                             )
         best_trial = analysis.best_trial
