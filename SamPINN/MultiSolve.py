@@ -243,24 +243,34 @@ for i in range(n_replicates):
         eigenval = model.lam.detach().numpy()[0]
         print("Eigenvalue : {}".format(eigenval))
 
-        errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
+
 
         #iterate through the previously computed solutions to check if we already found
         #this eigenvalue
         match = False
+
+        #temporary dictionary in order to update in the loop
+        temp_errors_model = errors_model.copy()
+
         for key,value in errors_model.items():
             if np.isclose(key,eigenval, 0.1):
-                if errors_model[key][1] > errors_model[eigenval][1]:
+                if errors_model[key][1] > final_error_train:
                     #keep the best solution
                     remove_from_file_eig(key,solved_path)
+                    del temp_errors_model[key]
+
+                    #save the best solution for this eigenvalue
                     dump_to_file_eig(eigenval, model, solved_path)
-                if eigenval == key:
-                    dump_to_file_eig(eigenval, model, solved_path)
+                    temp_errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
 
                 match = True
 
+        errors_model = temp_errors_model.copy()
+
         if not match:
+            #no match --> new eigenvalue --> save the model
             dump_to_file_eig(eigenval, model, solved_path)
+            errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
 
 
 # plot all the solutions on one figure for 1D problems
