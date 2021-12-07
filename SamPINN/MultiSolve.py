@@ -194,7 +194,7 @@ for i in range(n_replicates):
         "errors_model": errors_model
     }
 
-    start = time.time()
+    start = time.perf_counter()
     print("Fitting Model")
     if HYPER_SOLVE:
         analysis = tune.run(partial(training_function,params = params_training_function),
@@ -222,7 +222,7 @@ for i in range(n_replicates):
         print("\n################################################")
         print("Final Training Loss:", final_error_train)
         print("################################################")
-    end = time.time() - start
+    end = time.perf_counter() - start
     print("\nTraining Time: ", end)
 
     model = model.eval()
