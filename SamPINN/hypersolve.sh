@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ncores=128
+ncores=64
 maxmem=60000
 mem_per_core=$((maxmem/ncores)) 
 if [ "$1" = "single" ]; then
@@ -9,7 +9,7 @@ if [ "$1" = "single" ]; then
     "rusage[mem=$mem_per_core]" "python MultiSolve.py"
 fi
 
-ncores=128
+ncores=60
 maxmem=60000
 mem_per_core=$((maxmem/ncores))
 ptile_cores=$((ncores/6))
@@ -18,10 +18,10 @@ if [ "$1" = "multi" ]; then
     bsub -oo "eigensolvemulti.out" -n $ncores -W 04:00 -R "span[ptile=$ptile_cores]" -R "rusage[mem=$mem_per_core]"  "python MultiSolve.py"
 fi
 
-ncores=512
+ncores=64
 maxmem=60000
 mem_per_core=$((maxmem/ncores)) 
 if [ "$1" = "massive" ]; then
-    echo "Massive 512 core job"
+    echo "Massive core job"
     bsub -oo "eigensolvemassive.out" -n $ncores -W 04:00 -R "rusage[mem=$mem_per_core]" "python MultiSolve.py"
 fi
