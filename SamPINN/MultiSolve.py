@@ -4,7 +4,7 @@ import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = False
+HYPER_SOLVE = True
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -24,7 +24,8 @@ else :
     os.system("rm -r Solved")
     os.mkdir(folder_path)
 
-sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = initialize_inputs(1, HYPER_SOLVE=HYPER_SOLVE)
+sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = \
+    initialize_inputs(len(sys.argv), HYPER_SOLVE=HYPER_SOLVE)
 
 # unfold the network properties into single setup
 if HYPER_SOLVE:
