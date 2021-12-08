@@ -1,4 +1,4 @@
-#%%
+
 from ImportFile import *
 import itertools
 from functools import partial
@@ -271,7 +271,7 @@ for i in range(n_replicates):
             dump_to_file_eig(eigenval, model, solved_path)
             errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
 
-#%%
+
 # plot all the solutions on one figure for 1D problems
 if Ec.space_dimensions == 1 and not HYPER_SOLVE:
     x = np.linspace(Ec.extrema_values[0][0], Ec.extrema_values[0][1], 1000)
