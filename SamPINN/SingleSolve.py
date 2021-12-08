@@ -101,13 +101,15 @@ if not (os.path.exists(folder_path) and os.path.isdir(folder_path)):
     os.mkdir(images_path)
     os.mkdir(model_path)
 
-L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
-Ec.plotting(model, images_path, extrema, None)
+if Ec.space_dimensions < 3:
+    Ec.plotting(model, images_path, extrema, None)
+    if Ec.space_dimensions == 1:
+        L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
+        data = [N_u_train, N_coll_train, N_int_train, validation_size, end, L2_test,
+                rel_L2_test, final_error_train, error_vars, error_pde]
+        dump_to_file(model, model_path, folder_path, network_properties, data)
 
 eigenval = model.lam.detach().numpy()[0]
 print("Eigenvalue : {}".format(eigenval))
 print("{} iterations".format(model.iter))
 
-data = [N_u_train, N_coll_train, N_int_train, validation_size, end, L2_test,
-        rel_L2_test, final_error_train, error_vars, error_pde]
-dump_to_file(model, model_path, folder_path, network_properties, data)

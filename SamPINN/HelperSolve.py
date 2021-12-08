@@ -22,12 +22,12 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
 
         # Number of training+validation points
         n_coll_ = 2000
-        n_u_ = 2
+        n_u_ = 300
         n_int_ = 0
 
         network_properties_ = dict()
         # Additional Info
-        folder_path_ = "EigenLapl1dTest"
+        folder_path_ = "SingleSol"
         validation_size_ = 0.0  # useless
 
         #takes into account both hyperparam optimization with ray tune and single function
@@ -36,7 +36,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             network_properties_ = {
                 "hidden_layers": 4,
                 "neurons": 20,
-                "residual_parameter": 100,
+                "residual_parameter": 1000,
                 "kernel_regularizer": 1.0,
                 "normalization_parameter": 10000,
                 "othogonality_parameter": 100,
@@ -66,7 +66,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             }
 
         #pytorch seed
-        retrain_ = 30
+        retrain_ = 34
 
         # = true with batches
         shuffle_ = False
