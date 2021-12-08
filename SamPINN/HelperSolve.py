@@ -18,7 +18,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
     if len_sys_argv == 1:
 
         # Random Seed for sampling the dataset
-        sampling_seed_ = 2000
+        sampling_seed_ = 400
 
         # Number of training+validation points
         n_coll_ = 2000

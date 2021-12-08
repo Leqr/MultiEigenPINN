@@ -1,11 +1,10 @@
-import torch
-
+#%%
 from ImportFile import *
 import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = True
+HYPER_SOLVE = False
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -25,8 +24,7 @@ else :
     os.system("rm -r Solved")
     os.mkdir(folder_path)
 
-sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = \
-    initialize_inputs(len(sys.argv), HYPER_SOLVE=HYPER_SOLVE)
+sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = initialize_inputs(1, HYPER_SOLVE=HYPER_SOLVE)
 
 # unfold the network properties into single setup
 if HYPER_SOLVE:
@@ -170,7 +168,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 30
+n_replicates = 5
 
 torch.manual_seed(retrain)
 
@@ -272,7 +270,7 @@ for i in range(n_replicates):
             dump_to_file_eig(eigenval, model, solved_path)
             errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
 
-
+#%%
 # plot all the solutions on one figure for 1D problems
 if Ec.space_dimensions == 1 and not HYPER_SOLVE:
     x = np.linspace(Ec.extrema_values[0][0], Ec.extrema_values[0][1], 1000)
