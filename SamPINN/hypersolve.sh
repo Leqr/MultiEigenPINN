@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ncores=64
-maxmem=60000
+maxmem=40000
 mem_per_core=$((maxmem/ncores)) 
 if [ "$1" = "single" ]; then
     echo "Single core job"
@@ -9,8 +9,8 @@ if [ "$1" = "single" ]; then
     "rusage[mem=$mem_per_core]" "python MultiSolve.py"
 fi
 
-ncores=60
-maxmem=60000
+ncores=64
+maxmem=40000
 mem_per_core=$((maxmem/ncores))
 ptile_cores=$((ncores/6))
 if [ "$1" = "multi" ]; then
@@ -19,7 +19,7 @@ if [ "$1" = "multi" ]; then
 fi
 
 ncores=64
-maxmem=60000
+maxmem=40000
 mem_per_core=$((maxmem/ncores)) 
 if [ "$1" = "massive" ]; then
     echo "Massive core job"

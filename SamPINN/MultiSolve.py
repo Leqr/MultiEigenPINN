@@ -169,7 +169,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 5
+n_replicates = 20
 
 torch.manual_seed(retrain)
 
