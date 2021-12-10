@@ -133,7 +133,7 @@ def training_function(config, params):
             #add noise to the neural net weights to help get out of the previous local minima
             model.noise()
 
-    if not TRANSFER_LEARNING or (TRANSFER_LEARNING and i == 0):
+    if not TRANSFER_LEARNING or (TRANSFER_LEARNING and len(errors_model) == 0):
         model = Pinns(input_dimension=input_dimensions, output_dimension=output_dimension,
                       network_properties=config, other_networks=sols)
         init_xavier(model)
@@ -251,6 +251,9 @@ for i in range(n_replicates):
         #temporary dictionary in order to update in the loop
         temp_errors_model = errors_model.copy()
 
+        #compute the models generalization error (return None if no analyticalm solution)
+        L2_test, rel_L2_test = Ec.compute_generalization_error(model,extrema)
+
         for key,value in errors_model.items():
             if np.isclose(key,eigenval, 0.1):
                 if errors_model[key][1] > final_error_train:
@@ -260,7 +263,7 @@ for i in range(n_replicates):
 
                     #save the best solution for this eigenvalue
                     dump_to_file_eig(eigenval, model, solved_path)
-                    temp_errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
+                    temp_errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde, L2_test, rel_L2_test)
 
                 match = True
 
@@ -269,7 +272,7 @@ for i in range(n_replicates):
         if not match:
             #no match --> new eigenvalue --> save the model
             dump_to_file_eig(eigenval, model, solved_path)
-            errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde)
+            errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde, L2_test, rel_L2_test)
 
 
 # plot all the solutions on one figure for 1D problems

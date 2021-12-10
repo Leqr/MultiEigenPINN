@@ -21,7 +21,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 400
 
         # Number of training+validation points
-        n_coll_ = 1000
+        n_coll_ = 2000
         n_u_ = 2
         n_int_ = 0
 
@@ -66,7 +66,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             }
 
         #pytorch seed
-        retrain_ = 34
+        retrain_ = 30
 
         # = true with batches
         shuffle_ = False
@@ -308,7 +308,14 @@ def createDataSet(Ec, N_coll_train, N_b_train, N_i_train, N_int_train, batch_dim
     return training_set_class
 
 def printRecap(errors_model):
+    """
+    Prints a recapitulation table
+    :param errors_model: The dictionary from MultiSolve.py containing the eigensolution
+    and eigenvalue with some error values.
+    :return:
+    """
     from tabulate import tabulate
-    table = [[key,value[1],value[2],value[3]] for key,value in errors_model.items()]
-    print(tabulate(table, headers=["Eigenvalue","Total Loss", "Boundary Loss","PDE + Norm + Orth Loss"]))
+    table = [[key,value[1],value[2],value[3],value[4],value[5]] for key,value in errors_model.items()]
+    print(tabulate(table, headers=["Eigenvalue","Total Loss", "Boundary Loss","PDE + Norm + Orth Loss",
+                                   "L2 Error","Relative L2 Error"]))
 

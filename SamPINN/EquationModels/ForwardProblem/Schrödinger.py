@@ -109,7 +109,7 @@ class EquationClass(EquationBaseClass):
         return u, type_BC
 
     def compute_generalization_error(self, model, extrema, images_path=None):
-        return None
+        return None,None
 
     def plotting(self, model, images_path, extrema, solid):
         if self.space_dimensions == 2:
