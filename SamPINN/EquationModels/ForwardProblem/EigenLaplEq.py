@@ -101,7 +101,8 @@ class EquationClass(EquationBaseClass):
         if lam is not None :
             return torch.sin(lam*x)
         else:
-            return torch.sin(self.lam*x)
+            eigen = round(float(self.lam) * 2) / 2
+            return torch.sin(eigen*x)
 
     def ub0(self, t):
         type_BC = [DirichletBC()]
