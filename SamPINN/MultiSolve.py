@@ -102,7 +102,6 @@ def training_function(config, params):
     Ec= params["Equation"]
     training_set_class= params["training_set_class"]
     sols = None
-    i = params["i"]
     HYPER_SOLVE = params["HYPER_SOLVE"]
     TRANSFER_LEARNING = params["TRANSFER_LEARNING"]
     errors_model = params["errors_model"]
@@ -194,7 +193,6 @@ for i in range(n_replicates):
 
     #parameters packed in a dict to enable ray tune
     params_training_function = {
-        "i": i,
         "solved_path": solved_path,
         "input_dimensions": input_dimensions,
         "output_dimension": output_dimension,
@@ -216,7 +214,7 @@ for i in range(n_replicates):
                             verbose=3,
                             raise_on_failed_trial = False,
                             local_dir = local_dir,
-                            resources_per_trial={"cpu": 4}
+                            resources_per_trial={"cpu": 8}
                             )
 
         print("\n######################################")
