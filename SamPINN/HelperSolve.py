@@ -52,17 +52,17 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             network_properties_ = {
                 "hidden_layers": tune.grid_search([4]),
                 "neurons": tune.grid_search([20]),
-                "residual_parameter": tune.grid_search([1,100,10000]),
+                "residual_parameter": tune.grid_search([100,10000]),
                 "kernel_regularizer": tune.grid_search([1.0]),
                 "normalization_parameter" : tune.grid_search([10000,100000,1000000]),
-                "othogonality_parameter": tune.grid_search([1,100,1000]),
+                "othogonality_parameter": tune.grid_search([100,1000]),
                 "regularization_parameter": tune.grid_search([0.0]),
                 "batch_size": tune.grid_search([(n_coll_ + n_u_ + n_int_)]),
                 "epochs": tune.grid_search([1]),
                 "max_iter": tune.grid_search([100000]),
                 "activation": tune.grid_search(["snake"]),
                 "optimizer": tune.grid_search(["LBFGS"]),
-                "id_retrain": tune.grid_search([1,2])
+                "id_retrain": tune.grid_search([1])
             }
 
         #pytorch seed
@@ -214,7 +214,7 @@ def multiPlot1D(x,input_dimension, output_dimension,network_properties):
             plt.legend()
             plt.savefig("multiPlot1D.png")
 
-def multiPlot1D(x,errors_model,EquationClass):
+def multiPlot1DHYPER(x,errors_model,EquationClass):
     """
     Plots the output of the MultiSolve function by going through every models
     in the error_model dictionary. Overloaded for HYPER_SOLVE mode.
@@ -235,14 +235,18 @@ def multiPlot1D(x,errors_model,EquationClass):
     i = 0
     for key,value in errors_model.items():
         model = value[0]
+        model.eval()
         eigen = key
-        x_t = torch.tensor(x, dtype=torch.float32).reshape(-1, 1)
-        pred = model(x_t)
-        pred = pred.numpy()
-        plt.plot(x,pred,label = "lam = " + str(eigen),c = colors[i])
-        plt.plot(x,EquationClass.exact(x),lam = round(float(eigen) * 2) / 2,
-                 label = "lam = " + str(eigen),c = colors[i])
+        with torch.no_grad():
+            x_t = torch.tensor(x, dtype=torch.float32).reshape(-1, 1)
+            pred = model(x_t)
+            pred = pred.numpy()
+            plt.plot(x,pred,label = "lam = " + str(eigen),c = colors(i))
+            plt.plot(x,EquationClass.exact(x_t,lam = round(float(eigen) * 2) / 2),
+                     label = "lam = " + str(eigen),c = colors(i))
         i = i+1
+    plt.legend()
+    plt.savefig("multiPlot1D.png")
 
 
 def setupEquationClass(N_coll, N_u, N_int,validation_size,network_properties):

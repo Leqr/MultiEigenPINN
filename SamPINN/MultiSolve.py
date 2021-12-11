@@ -4,7 +4,7 @@ import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = False
+HYPER_SOLVE = True
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -283,7 +283,7 @@ if Ec.space_dimensions == 1 :
     if not HYPER_SOLVE:
         multiPlot1D(x, input_dimensions, output_dimension, network_properties, HYPER_SOLVE)
     else :
-        multiPlot1D(x,errors_model,Ec)
+        multiPlot1DHYPER(x,errors_model,Ec)
 
 if True :
     printRecap(errors_model)
