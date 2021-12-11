@@ -4,7 +4,7 @@ import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = False
+HYPER_SOLVE = True
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -215,7 +215,8 @@ for i in range(n_replicates):
                             config=network_properties,metric = 'loss_tot', mode = 'min',
                             verbose=3,
                             raise_on_failed_trial = False,
-                            local_dir = local_dir
+                            local_dir = local_dir,
+                            resources_per_trial={"cpu": 4}
                             )
 
         print("\n######################################")

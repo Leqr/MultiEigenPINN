@@ -112,5 +112,3 @@ if Ec.space_dimensions < 3:
 
 eigenval = model.lam.detach().numpy()[0]
 print("Eigenvalue : {}".format(eigenval))
-print("{} iterations".format(model.iter))
-
