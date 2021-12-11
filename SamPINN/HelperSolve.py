@@ -21,7 +21,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 400
 
         # Number of training+validation points
-        n_coll_ = 300
+        n_coll_ = 2000
         n_u_ = 2
         n_int_ = 0
 
@@ -346,7 +346,8 @@ def printRecap(errors_model):
     :return:
     """
     from tabulate import tabulate
-    table = [[key,value[1],value[2],value[3],value[4],value[5]] for key,value in errors_model.items()]
+    table = [[str(round(key,3)),'{:.3e}'.format(value[1]),'{:.3e}'.format(value[2]),'{:.3e}'.format(value[3]),
+              '{:.3e}'.format(value[4]),'{:.3e}'.format(value[5])] for key,value in errors_model.items()]
     print(tabulate(table, headers=["Eigenvalue","Total Loss", "Boundary Loss","PDE + Norm + Orth Loss",
-                                   "L2 Error","Relative L2 Error"]))
+                                   "L2 Error","Relative L2 Error"],disable_numparse=True))
 

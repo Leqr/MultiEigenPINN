@@ -171,7 +171,7 @@ def training_function(config, params):
     else: return errors,model
 
 #total number of replicates trial
-n_replicates = 5
+n_replicates = 15
 
 #number of replicates who had a sufficiently low loss to be kept as solution
 n_accepted = 0
@@ -214,7 +214,7 @@ for i in range(n_replicates):
                             verbose=3,
                             raise_on_failed_trial = False,
                             local_dir = local_dir,
-                            resources_per_trial={"cpu": 8}
+                            resources_per_trial={"cpu": 16}
                             )
 
         print("\n######################################")
@@ -300,7 +300,7 @@ if Ec.space_dimensions == 1 :
     else :
         multiPlot1DHYPER(x,errors_model,Ec)
 
-print(f"Acceptance rate : {n_accepted/n_replicates}")
+print(f"Acceptance rate : {n_accepted/n_replicates}\n")
 
 printRecap(errors_model)
 
