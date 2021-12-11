@@ -169,7 +169,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 5
+n_replicates = 3
 
 torch.manual_seed(retrain)
 
@@ -281,12 +281,11 @@ if Ec.space_dimensions == 1 :
     #if not HYPER_SOLVE the models are not kept, the .pkl files are reloaded
     #--> we also need input_dim, output_dim and network_properties
     if not HYPER_SOLVE:
-        multiPlot1D(x, input_dimensions, output_dimension, network_properties, HYPER_SOLVE)
+        multiPlot1D(x, input_dimensions, output_dimension, network_properties)
     else :
         multiPlot1DHYPER(x,errors_model,Ec)
 
-if True :
-    printRecap(errors_model)
+printRecap(errors_model)
 
 if HYPER_SOLVE:
     #remove log dir to free up space

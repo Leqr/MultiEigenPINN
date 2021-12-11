@@ -124,7 +124,12 @@ class EquationClass(EquationBaseClass):
         """
         model.eval()
         test_inp = self.convert(torch.rand([100000, extrema.shape[0]]), extrema)
-        Exact = (self.exact(test_inp)).numpy().reshape(-1, 1)
+
+        #take the eigenvalue from the model here as when using distributed training the updated EquationClass 
+        #from the training is sometimes lost, with this we can be sure that we compute the exact solution with
+        #the right eigenvalue
+        exact_lam = round(float(model.lam) * 2) / 2
+        Exact = (self.exact(test_inp,lam = exact_lam)).numpy().reshape(-1, 1)
         test_out = model(test_inp).detach().numpy().reshape(-1, 1)
         assert (Exact.shape[1] == test_out.shape[1])
 
