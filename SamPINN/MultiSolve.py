@@ -4,7 +4,7 @@ import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = True
+HYPER_SOLVE = False
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -276,9 +276,14 @@ for i in range(n_replicates):
 
 
 # plot all the solutions on one figure for 1D problems
-if Ec.space_dimensions == 1:
+if Ec.space_dimensions == 1 :
     x = np.linspace(Ec.extrema_values[0][0], Ec.extrema_values[0][1], 1000)
-    multiPlot1D(x, input_dimensions, output_dimension, network_properties)
+    #if not HYPER_SOLVE the models are not kept, the .pkl files are reloaded
+    #--> we also need input_dim, output_dim and network_properties
+    if not HYPER_SOLVE:
+        multiPlot1D(x, input_dimensions, output_dimension, network_properties, HYPER_SOLVE)
+    else :
+        multiPlot1D(x,errors_model,Ec)
 
 if True :
     printRecap(errors_model)

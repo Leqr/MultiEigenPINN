@@ -21,7 +21,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 400
 
         # Number of training+validation points
-        n_coll_ = 400
+        n_coll_ = 300
         n_u_ = 2
         n_int_ = 0
 
@@ -66,7 +66,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             }
 
         #pytorch seed
-        retrain_ = 20
+        retrain_ = 4
 
         # = true with batches
         shuffle_ = False
@@ -192,9 +192,6 @@ def multiPlot1D(x,input_dimension, output_dimension,network_properties):
 
     plt.figure(figsize=(14, 10), dpi=120)
 
-    #for the laplacian eigenvalue problem with known eigenvalue
-    precision = 0.05
-
     for subdir, dirs, files in os.walk(path_to_solved):
         for file in files:
             # go through every model
@@ -205,18 +202,48 @@ def multiPlot1D(x,input_dimension, output_dimension,network_properties):
             extension = split[1]
             path_to_file = path_to_solved + "/" + file
             if extension == ".pkl":
-                if abs(eigen_float - round(eigen_float * 2) / 2) < precision:
-                    model = Pinns(input_dimension=input_dimension, output_dimension=output_dimension,
-                                  network_properties=network_properties)
-                    model.load_state_dict(torch.load(path_to_file))
-                    model.eval()
-                    with torch.no_grad():
-                        x_t = torch.tensor(x,dtype = torch.float32).reshape(-1,1)
-                        pred = model(x_t)
-                        pred = pred.numpy()
-                        plt.plot(x,pred,label = "lam = " + str(eigen))
+                model = Pinns(input_dimension=input_dimension, output_dimension=output_dimension,
+                              network_properties=network_properties)
+                model.load_state_dict(torch.load(path_to_file))
+                model.eval()
+                with torch.no_grad():
+                    x_t = torch.tensor(x,dtype = torch.float32).reshape(-1,1)
+                    pred = model(x_t)
+                    pred = pred.numpy()
+                    plt.plot(x,pred,label = "lam = " + str(eigen))
             plt.legend()
             plt.savefig("multiPlot1D.png")
+
+def multiPlot1D(x,errors_model,EquationClass):
+    """
+    Plots the output of the MultiSolve function by going through every models
+    in the error_model dictionary. Overloaded for HYPER_SOLVE mode.
+    :param x: Values on which the model needs to be evaluated.
+    :param errors_model: errors_model[eigenvalue] =
+    (model,final_error_train, error_vars, error_pde, L2_test_error, rel_L2_test_error)
+    """
+
+    #plot color generator
+    def get_cmap(n, name='hsv'):
+        '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct
+        RGB color; the keyword argument name must be a standard mpl colormap name.'''
+        return plt.cm.get_cmap(name, n)
+
+    plt.figure(figsize=(14, 10), dpi=120)
+
+    colors = get_cmap(len(errors_model))
+    i = 0
+    for key,value in errors_model.items():
+        model = value[0]
+        eigen = key
+        x_t = torch.tensor(x, dtype=torch.float32).reshape(-1, 1)
+        pred = model(x_t)
+        pred = pred.numpy()
+        plt.plot(x,pred,label = "lam = " + str(eigen),c = colors[i])
+        plt.plot(x,EquationClass.exact(x),lam = round(float(eigen) * 2) / 2,
+                 label = "lam = " + str(eigen),c = colors[i])
+        i = i+1
+
 
 def setupEquationClass(N_coll, N_u, N_int,validation_size,network_properties):
     """
