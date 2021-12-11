@@ -21,7 +21,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 400
 
         # Number of training+validation points
-        n_coll_ = 2000
+        n_coll_ = 400
         n_u_ = 2
         n_int_ = 0
 

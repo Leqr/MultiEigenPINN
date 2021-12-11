@@ -127,7 +127,12 @@ class EquationClass(EquationBaseClass):
         Exact = (self.exact(test_inp)).numpy().reshape(-1, 1)
         test_out = model(test_inp).detach().numpy().reshape(-1, 1)
         assert (Exact.shape[1] == test_out.shape[1])
-        L2_test = np.sqrt(np.mean((Exact - test_out) ** 2))
+
+        #need to take into account a sign difference in the solution --> keep lowest error
+        L2_test_1 = np.sqrt(np.mean((Exact - test_out) ** 2))
+        L2_test_2 = np.sqrt(np.mean((Exact + test_out) ** 2))
+        L2_test = min(L2_test_1,L2_test_2)
+        
         print("Error :", L2_test)
 
         rel_L2_test = L2_test / np.sqrt(np.mean(Exact ** 2))

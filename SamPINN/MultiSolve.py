@@ -169,7 +169,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 20
+n_replicates = 5
 
 torch.manual_seed(retrain)
 
@@ -282,3 +282,7 @@ if Ec.space_dimensions == 1 and not HYPER_SOLVE:
 
 if True :
     printRecap(errors_model)
+
+if HYPER_SOLVE:
+    #remove log dir to free up space
+    os.system("rm -r $HOME/ray_results/")
