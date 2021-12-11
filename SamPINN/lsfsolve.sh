@@ -11,7 +11,7 @@ fi
 ncores=64
 maxmem=40000
 mem_per_core=$((maxmem/ncores))
-ptile_cores=$((ncores/4))
+ptile_cores=$((ncores/2))
 if [ "$1" = "multi" ]; then
     echo "Multi core job"
     bsub -oo "eigensolvemulti.out" -n $ncores -W 04:00 -R "span[ptile=$ptile_cores]" -R "rusage[mem=$mem_per_core]"  "python MultiSolve.py"
