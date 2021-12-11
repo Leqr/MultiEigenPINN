@@ -15,6 +15,9 @@ if HYPER_SOLVE:
     #reduces the output of warnings
     ray.init(log_to_driver=False) #,local_mode=True) #sequential run param
 
+sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = \
+    initialize_inputs(len(sys.argv), HYPER_SOLVE=HYPER_SOLVE)
+
 # create folder that will store the eigenvalue and the solution network
 folder_path = "Solved"
 if not (os.path.exists(folder_path) and os.path.isdir(folder_path)):
@@ -23,9 +26,6 @@ if not (os.path.exists(folder_path) and os.path.isdir(folder_path)):
 else :
     os.system("rm -r Solved")
     os.mkdir(folder_path)
-
-sampling_seed, N_coll, N_u, N_int, folder_path, validation_size, network_properties, retrain, shuffle = \
-    initialize_inputs(len(sys.argv), HYPER_SOLVE=HYPER_SOLVE)
 
 # unfold the network properties into single setup
 if HYPER_SOLVE:
@@ -67,9 +67,9 @@ print("Parameter Dimensions", parameter_dimensions)
 
 
 if network_properties["optimizer"] == "LBFGS" and network_properties["epochs"] != 1 and \
+        network_properties["max_iter"] == 1 and (batch_dim == "full" or batch_dim == N_train):
     print("\n######################################")
     print("*******Batch and Optimizer Warning********")
-        network_properties["max_iter"] == 1 and (batch_dim == "full" or batch_dim == N_train):
     print(bcolors.WARNING + "WARNING: you set max_iter=1 and epochs=" + str(
         network_properties["epochs"]) + " with a LBFGS optimizer.\n"
                                         "This will work but it is not efficient in full batch mode. Set max_iter = " + str(
@@ -253,18 +253,8 @@ for i in range(n_replicates):
 
         n_accepted += 1
 
-        images_path = folder_path + "/Images"
-        model_path = folder_path + "/TrainedModel"
-
-        if not (os.path.exists(folder_path) and os.path.isdir(folder_path)):
-            os.mkdir(folder_path)
-            os.mkdir(images_path)
-            os.mkdir(model_path)
-
-
         eigenval = model.lam.detach().numpy()[0]
         print("Eigenvalue : {}".format(eigenval))
-
 
         #iterate through the previously computed solutions to check if we already found
         #this eigenvalue
