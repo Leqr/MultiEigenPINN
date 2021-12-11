@@ -64,9 +64,11 @@ print("*******Dimensions********")
 print("Space Dimensions", space_dimensions)
 print("Time Dimension", time_dimension)
 print("Parameter Dimensions", parameter_dimensions)
-print("\n######################################")
+
 
 if network_properties["optimizer"] == "LBFGS" and network_properties["epochs"] != 1 and \
+    print("\n######################################")
+    print("*******Batch and Optimizer Warning********")
         network_properties["max_iter"] == 1 and (batch_dim == "full" or batch_dim == N_train):
     print(bcolors.WARNING + "WARNING: you set max_iter=1 and epochs=" + str(
         network_properties["epochs"]) + " with a LBFGS optimizer.\n"
@@ -169,7 +171,15 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
+#total number of replicates trial
 n_replicates = 15
+
+#number of replicates who had a sufficiently low loss to be kept as solution
+n_accepted = 0
+
+#threshold on the total loss to keep a replicate as a solution
+acceptance_value = 0.8
+
 
 torch.manual_seed(retrain)
 
@@ -178,6 +188,8 @@ torch.manual_seed(retrain)
 errors_model = dict()
 
 for i in range(n_replicates):
+    print("\n######################################")
+    print("*******Training********")
     print("Computation Number : ", i)
 
     #parameters packed in a dict to enable ray tune
@@ -197,10 +209,7 @@ for i in range(n_replicates):
     print("Fitting Model")
     if HYPER_SOLVE:
         
-        local_dir = os.getcwd()
-        if sys.platform == "linux":
-        #assumes only clusters with SCRATCH directories are running linux
-            local_dir = "$SCRATCH"
+        local_dir = os.getcwd()+"/ray_results"
 
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_tot', mode = 'min',
@@ -208,6 +217,9 @@ for i in range(n_replicates):
                             raise_on_failed_trial = False,
                             local_dir = local_dir
                             )
+
+        print("\n######################################")
+        print("*******Best Trial********")
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
 
@@ -225,16 +237,21 @@ for i in range(n_replicates):
         final_error_train = float(((10 ** errors[0]) ** 0.5).detach().cpu().numpy())
         error_vars = float((errors[1]).detach().cpu().numpy())
         error_pde = float((errors[2]).detach().cpu().numpy())
-        print("\n################################################")
+        print("\n######################################")
+        print("*******Loss********")
         print("Final Training Loss:", final_error_train)
-        print("################################################")
+
+    print("\n######################################")
+    print("*******Stats and Metrics********")
     end = time.perf_counter() - start
     print("\nTraining Time: ", end)
 
     model = model.eval()
 
     # only keep solutions that have a low enough loss
-    if final_error_train < 0.8:
+    if final_error_train < acceptance_value:
+
+        n_accepted += 1
 
         images_path = folder_path + "/Images"
         model_path = folder_path + "/TrainedModel"
@@ -244,11 +261,9 @@ for i in range(n_replicates):
             os.mkdir(images_path)
             os.mkdir(model_path)
 
-        L2_test, rel_L2_test = Ec.compute_generalization_error(model, extrema, images_path)
 
         eigenval = model.lam.detach().numpy()[0]
         print("Eigenvalue : {}".format(eigenval))
-
 
 
         #iterate through the previously computed solutions to check if we already found
@@ -282,6 +297,9 @@ for i in range(n_replicates):
             errors_model[eigenval] =  (model,final_error_train, error_vars, error_pde, L2_test, rel_L2_test)
 
 
+
+print("\n######################################")
+print("*******Total Stats and Metrics********")
 # plot all the solutions on one figure for 1D problems
 if Ec.space_dimensions == 1 :
     x = np.linspace(Ec.extrema_values[0][0], Ec.extrema_values[0][1], 1000)
@@ -292,4 +310,8 @@ if Ec.space_dimensions == 1 :
     else :
         multiPlot1DHYPER(x,errors_model,Ec)
 
+print(f"Acceptance rate : {n_accepted/n_replicates}")
+
 printRecap(errors_model)
+
+
