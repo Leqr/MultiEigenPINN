@@ -148,7 +148,7 @@ class Pinns(nn.Module):
 
     def evaluate_true_solutions(self,x_coll, equation_class) :
         """
-        Use the known solutions of ∆u = lambda*u in [0,2*pi] with dirichlet
+        Use the known solutions of ∆u + lambda**2*u = 0 in [0,2*pi] with dirichlet
         boundary condition to create the solutions that will be used in
         the orthogonality condition.
         This is done in an incremental manner.
