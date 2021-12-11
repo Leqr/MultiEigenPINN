@@ -169,7 +169,7 @@ def training_function(config, params):
                     torch_seed = retrain)
     else: return errors,model
 
-n_replicates = 10
+n_replicates = 15
 
 torch.manual_seed(retrain)
 
@@ -196,10 +196,17 @@ for i in range(n_replicates):
     start = time.perf_counter()
     print("Fitting Model")
     if HYPER_SOLVE:
+        
+        local_dir = os.getcwd()
+        if sys.platform == "linux":
+        #assumes only clusters with SCRATCH directories are running linux
+            local_dir = "$SCRATCH"
+
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_tot', mode = 'min',
-                            verbose=2,
-                            raise_on_failed_trial = False
+                            verbose=0,
+                            raise_on_failed_trial = False,
+                            local_dir = local_dir
                             )
         best_trial = analysis.best_trial
         print("Best trial config: {}".format(best_trial.config))
@@ -286,7 +293,3 @@ if Ec.space_dimensions == 1 :
         multiPlot1DHYPER(x,errors_model,Ec)
 
 printRecap(errors_model)
-
-if HYPER_SOLVE:
-    #remove log dir to free up space
-    os.system("rm -r $HOME/ray_results/")
