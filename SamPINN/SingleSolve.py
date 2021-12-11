@@ -1,10 +1,11 @@
 from ImportFile import *
 
-torch.manual_seed(42)
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 sampling_seed, N_coll, N_u, N_int, folder_path, validation_size\
     , network_properties, retrain, shuffle = initialize_inputs(len(sys.argv))
+
+torch.manual_seed(retrain)
 
 [Ec, max_iter, extrema, input_dimensions, output_dimension, space_dimensions, \
                 time_dimension, parameter_dimensions, N_u_train, N_coll_train, \

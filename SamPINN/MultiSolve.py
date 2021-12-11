@@ -4,7 +4,7 @@ import itertools
 from functools import partial
 
 # manage the hyperparameter optimization mode
-HYPER_SOLVE = True
+HYPER_SOLVE = False
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
 TRANSFER_LEARNING = True
@@ -188,7 +188,7 @@ torch.manual_seed(retrain)
 errors_model = dict()
 
 for i in range(n_replicates):
-    print("\n######################################")
+    print("\n#####################################################")
     print("*******Training********")
     print("Computation Number : ", i)
 
@@ -213,7 +213,7 @@ for i in range(n_replicates):
 
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_tot', mode = 'min',
-                            verbose=0,
+                            verbose=3,
                             raise_on_failed_trial = False,
                             local_dir = local_dir
                             )
@@ -245,12 +245,13 @@ for i in range(n_replicates):
     print("*******Stats and Metrics********")
     end = time.perf_counter() - start
     print("\nTraining Time: ", end)
+    print("{} iterations".format(model.iter))
 
     model = model.eval()
 
     # only keep solutions that have a low enough loss
     if final_error_train < acceptance_value:
-
+        print("\n***Accepted***\n")
         n_accepted += 1
 
         eigenval = model.lam.detach().numpy()[0]
