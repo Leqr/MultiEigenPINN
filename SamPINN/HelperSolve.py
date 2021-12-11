@@ -66,7 +66,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
             }
 
         #pytorch seed
-        retrain_ = 30
+        retrain_ = 20
 
         # = true with batches
         shuffle_ = False
