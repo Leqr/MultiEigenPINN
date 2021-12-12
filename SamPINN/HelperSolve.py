@@ -21,7 +21,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 400
 
         # Number of training+validation points
-        n_coll_ = 2000
+        n_coll_ = 300
         n_u_ = 2
         n_int_ = 0
 
@@ -244,8 +244,8 @@ def multiPlot1DHYPER(x,errors_model,EquationClass):
             exact = EquationClass.exact(x_t,lam = round(float(eigen) * 2) / 2).numpy().reshape(-1,1)
 
             #compare the sign of the solutions to maybe flip --> assumes the prediction is close to the exact value
-            L2_test_1 = np.mean((Exact - pred) ** 2)
-            L2_test_2 = np.mean((Exact + pred) ** 2)
+            L2_test_1 = np.mean((exact - pred) ** 2)
+            L2_test_2 = np.mean((exact + pred) ** 2)
             if L2_test_2 < L2_test_1 : exact = -1.0*exact
 
             plt.plot(x,pred,label = "lam = " + str(eigen),c = colors(i))

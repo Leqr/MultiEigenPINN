@@ -149,3 +149,4 @@ lsf*
 #remove those folders
 vpinn/
 figures/
+*ray_results/
