@@ -18,10 +18,10 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
     if len_sys_argv == 1:
 
         # Random Seed for sampling the dataset
-        sampling_seed_ = 400
+        sampling_seed_ = 200
 
         # Number of training+validation points
-        n_coll_ = 300
+        n_coll_ = 500
         n_u_ = 2
         n_int_ = 0
 
@@ -62,7 +62,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
                 "max_iter": tune.grid_search([100000]),
                 "activation": tune.grid_search(["snake"]),
                 "optimizer": tune.grid_search(["LBFGS"]),
-                "id_retrain": tune.grid_search([1,2])
+                "id_retrain": tune.grid_search([1])
             }
 
         #pytorch seed
@@ -252,7 +252,7 @@ def multiPlot1DHYPER(x,errors_model,EquationClass):
             plt.plot(x,exact,label = "lam = " + str(round(float(eigen) * 2) / 2),c = colors(i))
 
         i = i+1
-    plt.legend()
+    plt.legend(loc = 'upper right')
     plt.savefig("multiPlot1D.png")
 
 
