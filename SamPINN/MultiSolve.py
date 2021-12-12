@@ -171,7 +171,7 @@ def training_function(config, params):
     else: return errors,model
 
 #total number of replicates trial
-n_replicates = 15
+n_replicates = 4
 
 #number of replicates who had a sufficiently low loss to be kept as solution
 n_accepted = 0
@@ -211,7 +211,7 @@ for i in range(n_replicates):
 
         analysis = tune.run(partial(training_function,params = params_training_function),
                             config=network_properties,metric = 'loss_tot', mode = 'min',
-                            verbose=3,
+                            verbose=0,
                             raise_on_failed_trial = False,
                             local_dir = local_dir,
                             resources_per_trial={"cpu": 16}

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#choose what mode you want to run in by calling lsfsolve.sh with single, multi or massive as first argument
+
 ncores=64
 maxmem=40000
 mem_per_core=$((maxmem/ncores)) 

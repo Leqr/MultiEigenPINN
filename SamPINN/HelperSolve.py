@@ -241,9 +241,16 @@ def multiPlot1DHYPER(x,errors_model,EquationClass):
             x_t = torch.tensor(x, dtype=torch.float32).reshape(-1, 1)
             pred = model(x_t)
             pred = pred.numpy()
+            exact = EquationClass.exact(x_t,lam = round(float(eigen) * 2) / 2).numpy().reshape(-1,1)
+
+            #compare the sign of the solutions to maybe flip --> assumes the prediction is close to the exact value
+            L2_test_1 = np.mean((Exact - pred) ** 2)
+            L2_test_2 = np.mean((Exact + pred) ** 2)
+            if L2_test_2 < L2_test_1 : exact = -1.0*exact
+
             plt.plot(x,pred,label = "lam = " + str(eigen),c = colors(i))
-            plt.plot(x,EquationClass.exact(x_t,lam = round(float(eigen) * 2) / 2),
-                     label = "lam = " + str(round(float(eigen) * 2) / 2),c = colors(i))
+            plt.plot(x,exact,label = "lam = " + str(round(float(eigen) * 2) / 2),c = colors(i))
+
         i = i+1
     plt.legend()
     plt.savefig("multiPlot1D.png")
