@@ -33,7 +33,7 @@ do
 
     #get the simulated acceptance ratio
     VAR="`grep Acceptance eigensolvesingle.out`"
-    lastThree=${country: -3}
+    lastThree=${VAR: -3}
 
     echo $lastThree >> acceptances.txt
 

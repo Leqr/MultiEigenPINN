@@ -21,7 +21,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
         sampling_seed_ = 200
 
         # Number of training+validation points
-        n_coll_ = 500
+        n_coll_ = 1000
         n_u_ = 2
         n_int_ = 0
 
@@ -62,7 +62,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
                 "max_iter": tune.grid_search([100000]),
                 "activation": tune.grid_search(["snake"]),
                 "optimizer": tune.grid_search(["LBFGS"]),
-                "id_retrain": tune.grid_search([1])
+                "id_retrain": tune.grid_search([1,2])
             }
 
         #pytorch seed
