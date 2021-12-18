@@ -6,7 +6,7 @@ from functools import partial
 HYPER_SOLVE = True
 
 # uses the previous network to compute a new eigenvalue and eigenfunction (transfer learning)
-TRANSFER_LEARNING = True
+TRANSFER_LEARNING = False
 
 if HYPER_SOLVE:
     from ray import tune
@@ -170,7 +170,7 @@ def training_function(config, params):
     else: return errors,model
 
 #total number of replicates trial
-n_replicates = 10
+n_replicates = 20
 
 #number of replicates who had a sufficiently low loss to be kept as solution
 n_accepted = 0
