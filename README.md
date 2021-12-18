@@ -37,9 +37,9 @@ Most of the settings mentionned above apply for this solver.
 
 **retrain_** defines the random seed for the solver. There is no way to set a random seed if **HYPER_SOLVE** is true (randomly chosen for different trials).
 
-The equation to solve is defined by a class in **src/EquationModels/ForwardProblem**, in order to change the equation, the wanted equation class file need to be mentioned in [ImportFile.py](src/ImportFile.py) to define the wanted **EquationClass**.
+The equation to solve is defined by a class in [src/EquationModels/ForwardProblem](src/EquationModels/ForwardProblems/), in order to change the equation, the wanted equation class file need to be mentioned in [ImportFile.py](src/ImportFile.py) to define the wanted **EquationClass**.
 
 
 ## Running on an lsf scheduled cluster
-There are in **src/utils** a few useful bash scripts to launch the solver with the lsf batch system.
+There are in [src/utils](src/utils/) a few useful bash scripts to launch the solver with the lsf batch system.
 
