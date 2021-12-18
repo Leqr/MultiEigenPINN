@@ -9,7 +9,7 @@ python3 -m pip install -r requirements.txt
 ```
 
 ## Running the multi-eigenpair solver
-For finding mutliple eigenpairs, run [MultiSolve.py](src/MultoSolve.py)
+For finding mutliple eigenpairs, run [MultiSolve.py](src/MultiSolve.py)
 
 #### A few settings for this solver :
 
