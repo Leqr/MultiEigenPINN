@@ -22,7 +22,7 @@ def initialize_inputs(len_sys_argv,HYPER_SOLVE = False):
 
         # Number of training+validation points
         n_coll_ = 2000
-        n_u_ = 2
+        n_u_ = 300
         n_int_ = 0
 
         network_properties_ = dict()

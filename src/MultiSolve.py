@@ -170,7 +170,7 @@ def training_function(config, params):
     else: return errors,model
 
 #total number of replicates trial
-n_replicates = 20
+n_replicates = 10
 
 #number of replicates who had a sufficiently low loss to be kept as solution
 n_accepted = 0
