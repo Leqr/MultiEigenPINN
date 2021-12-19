@@ -353,8 +353,14 @@ def printRecap(errors_model):
     :return:
     """
     from tabulate import tabulate
-    table = [[str(round(key,3)),'{:.3e}'.format(value[1]),'{:.3e}'.format(value[2]),'{:.3e}'.format(value[3]),
-              '{:.3e}'.format(value[4]),'{:.3e}'.format(value[5])] for key,value in errors_model.items()]
-    print(tabulate(table, headers=["Eigenvalue","Total Loss", "Boundary Loss","PDE + Norm + Orth Loss",
-                                   "L2 Error","Relative L2 Error"],disable_numparse=True))
+    if(errors_model[list(errors_model.keys())[0]][5] is not None):
+        table = [[str(round(key,3)),'{:.3e}'.format(value[1]),'{:.3e}'.format(value[2]),'{:.3e}'.format(value[3]),
+                  '{:.3e}'.format(value[4]),'{:.3e}'.format(value[5])] for key,value in errors_model.items()]
+        print(tabulate(table, headers=["Eigenvalue","Total Loss", "Boundary Loss","PDE + Norm + Orth Loss",
+                                       "L2 Error","Relative L2 Error"],disable_numparse=True))
+    else:
+        table = [[str(round(key, 3)), '{:.3e}'.format(value[1]), '{:.3e}'.format(value[2]), '{:.3e}'.format(value[3])] for key, value in errors_model.items()]
+        print(tabulate(table, headers=["Eigenvalue", "Total Loss", "Boundary Loss", "PDE + Norm + Orth Loss"
+                                       ], disable_numparse=True))
+
 

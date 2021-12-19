@@ -72,7 +72,7 @@ class EquationClass(EquationBaseClass):
         for i in range(self.space_dimensions):
             grads.append(torch.autograd.grad(grad_u[:,i], x_f_train, grad_outputs=torch.ones_like(u), create_graph=True)[0][:,i])
 
-        residual = sum(grads) + (network.lam**2)*u
+        residual = sum(grads) - network.lam**u
 
         #enforce function normalisation
         norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
