@@ -51,7 +51,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-from EquationModels.ForwardProblem.Schrödinger import EquationClass
+from EquationModels.ForwardProblem.FreeSchrödinger import EquationClass
 
 from FitClass import *
 from ModClass import *

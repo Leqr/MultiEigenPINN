@@ -74,8 +74,12 @@ class EquationClass(EquationBaseClass):
 
         residual = sum(grads) - network.lam**u
 
-        #enforce function normalisation
-        norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-0.5).reshape(1,)
+        #enforce probability density normalisation a la QM
+        volume = 1
+        for val in self.extrema_values:
+            length = val[1]-val[0]
+            volume *= length
+        norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-volume/len(u)).reshape(1,)
 
         #othogonal condition when trying to solve for multiple eigenvalues
         loss_orth = torch.tensor([0.0])
