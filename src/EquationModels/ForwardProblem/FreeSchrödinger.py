@@ -9,8 +9,8 @@ from BoundaryConditions import PeriodicBC, DirichletBC, AbsorbingBC, NoneBC
 
 class EquationClass(EquationBaseClass):
     """
-    ∆u = lambda*u on [0,2*pi] x ... x [0,2*pi]
-    u(x) = 0.0 on the boundary
+    ∆u + E*u = 0 on [0,2*pi] x ... x [0,2*pi]
+    u(x) = 0.0 on the boundary (free particle in a box with infinite potential outside)
     """
 
     def __init__(self, dimension = 2):
@@ -51,8 +51,8 @@ class EquationClass(EquationBaseClass):
 
     def compute_res(self, network, x_f_train, solid_object, lambda_norm = 10, lambda_orth = 100, verbose = False):
         """
-        Computes the PDE residual. It is constituted of the pde loss ∆u + u*lambda^2,
-        the normalization loss |||u||^2 - 0.5| and the orthogonal condition when some
+        Computes the PDE residual. It is constituted of the pde loss ∆u = u*lambda,
+        the normalization loss |||u||^2 - c| and the orthogonal condition when some
         eigensolutions were already found sum over the previous solutions of <u,u_prev>.
         :param network:
         :param x_f_train:
@@ -72,14 +72,18 @@ class EquationClass(EquationBaseClass):
         for i in range(self.space_dimensions):
             grads.append(torch.autograd.grad(grad_u[:,i], x_f_train, grad_outputs=torch.ones_like(u), create_graph=True)[0][:,i])
 
-        residual = sum(grads) - network.lam**u
+        hbar = 1.054571e-34
+        melectron = 9.109383e-31
+        residual = sum(grads) + network.lam**u
 
         #enforce probability density normalisation a la QM
+        #compute the volume of Omega for monte carlo integration
         volume = 1
         for val in self.extrema_values:
             length = val[1]-val[0]
             volume *= length
-        norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-volume/len(u)).reshape(1,)
+
+        norm_loss = lambda_norm*torch.abs(torch.mean(u**2)-1/volume).reshape(1,)
 
         #othogonal condition when trying to solve for multiple eigenvalues
         loss_orth = torch.tensor([0.0])

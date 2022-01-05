@@ -10,7 +10,7 @@ maxmem=40000
 mem_per_core=$((maxmem/ncores)) 
 if [ "$1" = "single" ]; then
     echo "Single core job"
-    bsub -cwd $PREV_DIR -oo "eigensolvesingle.out" -n $ncores -W 04:00 -R "span[ptile=$ncores]" -R "select[model==EPYC_7742]" -R "rusage[mem=$mem_per_core]" "python MultiSolve.py"
+    bsub -cwd $PREV_DIR -oo "eigensolvesingle.out" -n $ncores -W 08:00 -R "span[ptile=$ncores]" -R "select[model==EPYC_7742]" -R "rusage[mem=$mem_per_core]" "python MultiSolve.py"
 fi
 
 ncores=64
